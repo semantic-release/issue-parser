@@ -3,6 +3,16 @@
 const _ = require('lodash');
 const hostConfig = require('./lib/hosts-config');
 
+const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
+const CODE_BLOCK_REGEXP = /(`(?![\\]))((?:.(?!\1(?![\\])))*.?)\1/g;
+
+function inverse(str) {
+  return str
+    .split('')
+    .reverse()
+    .join('');
+}
+
 function join(keywords) {
   return keywords.map(_.escapeRegExp).join('|');
 }
@@ -33,10 +43,11 @@ function buildMentionRegexp(opts) {
 }
 
 function parse(text, regexp, mentionRegexp, opts) {
+  const noCodeBlock = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
   let parsed;
   const results = {actions: [], refs: [], duplicates: [], mentions: []};
 
-  while ((parsed = regexp.exec(text)) !== null) {
+  while ((parsed = regexp.exec(noCodeBlock)) !== null) {
     const raw = parsed[0].substring(parsed[0].indexOf(parsed[1] || parsed[2] || parsed[3]));
     const action = _.capitalize(parsed[1]);
     const slug = parsed[2];
