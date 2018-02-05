@@ -158,6 +158,21 @@ test('Parse mentions', t => {
   t.deepEqual(m('github')('@user@user').mentions, [{raw: '@user', prefix: '@', user: 'user'}]);
 });
 
+test('Exclude code blocks', t => {
+  t.deepEqual(
+    m('github')(
+      `Fix #1, \\\`Fix #2\\\` \`Fix #3\` \`\\\`Fix #4\\\`\`
+\`\`\`js
+Fix #5
+\`\`\``
+    ).actions,
+    [
+      {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+      {issue: '2', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #2'},
+    ]
+  );
+});
+
 test('Empty options', t => {
   const empty = {actions: [], duplicates: [], mentions: [], refs: []};
 
