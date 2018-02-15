@@ -12,10 +12,7 @@
   "devDependencies": {
     "ava": "^0.25.0",
     "codecov": "^3.0.0",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.5.0",
     "nyc": "^11.1.0",
-    "prettier": "~1.10.2",
     "semantic-release": "^12.4.1",
     "xo": "^0.20.0"
   },
@@ -57,10 +54,7 @@
     "all": true
   },
   "prettier": {
-    "printWidth": 120,
-    "singleQuote": true,
-    "bracketSpacing": false,
-    "trailingComma": "es5"
+    "printWidth": 120
   },
   "publishConfig": {
     "access": "public"
@@ -76,8 +70,6 @@
     "test": "xo && nyc ava -v"
   },
   "xo": {
-    "extends": [
-      "plugin:prettier/recommended"
-    ]
+    "prettier": true
   }
 }
