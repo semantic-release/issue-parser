@@ -176,7 +176,7 @@ Fix #5
 test('Exclude code blocks with html <code></code> tags', t => {
 	t.deepEqual(
 		m('github')(`Fix #1 <code>Fix #2</code> Fix #3 <code>
-Fix #4</code> <CODE> Fix#5</CODE> <code><code>Fix #6</code></code>`).actions,
+Fix #4</code> <CODE> Fix#5</CODE> <code><code>Fix #6</code>Fix #7</code>`).actions,
 		[
 			{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
 			{issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
@@ -193,6 +193,10 @@ Fix #2
 </code></code>`).actions,
 		[{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'}]
 	);
+
+	t.deepEqual(m('github')(`\`<code>\`Fix #1</code>`).actions, [
+		{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+	]);
 });
 
 test('Empty options', t => {
