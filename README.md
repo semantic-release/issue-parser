@@ -1,6 +1,6 @@
 # issue-parser
 
-Parser for Github, GitLab and Bitbucket issues actions, references and user
+Parser for Github, GitLab and Bitbucket issues actions, references and mentions
 
 [![Travis](https://img.shields.io/travis/pvdlg/issue-parser.svg)](https://travis-ci.org/pvdlg/issue-parser)
 [![Codecov](https://img.shields.io/codecov/c/github/pvdlg/issue-parser.svg)](https://codecov.io/gh/pvdlg/issue-parser)
@@ -19,6 +19,8 @@ $ npm install --save issue-parser
 
 ## Usage
 
+### GitHub format
+
 ```js
 const issueParser = require('issue-parser');
 const parse = issueParser('github');
@@ -33,6 +35,8 @@ issueParser('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc 
 }
 */
 ```
+
+### GitLab format
 
 ```js
 const issueParser = require('issue-parser');
@@ -49,6 +53,8 @@ issueParser('Issue description, ref group/user/package#1, implement #2, /duplica
 */
 ```
 
+### Bitbucket format
+
 ```js
 const issueParser = require('issue-parser')
 const parse = issueParser('bitbucket');
@@ -63,6 +69,8 @@ issueParser('Issue description, ref user/package#1, fixing #2. /cc @user');
 }
 */
 ```
+
+### Custom format
 
 ```js
 const issueParser = require('issue-parser')
@@ -79,6 +87,164 @@ issueParser('Issue description, related to user/package🐛1, Complete 🐛2');
 */
 ```
 
+## Features
+
+### Parse references
+
+```text
+#1
+```
+```js
+{refs: [{raw: '#1', slug: undefined, prefix: '#', issue: '1'}]}
+```
+
+### Parse repository slug
+
+```text
+owner/repo#1
+```
+```js
+{refs: [{raw: 'owner/repo#1', slug: 'owner/repo', prefix: '#', issue: '1'}]}
+```
+
+### Parse closing keywords
+
+```text
+Fix #1
+```
+```js
+{actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}]}
+```
+
+### Parse duplicate keywords
+
+```text
+Duplicate of #1
+```
+```js
+{duplicates: [{raw: 'Duplicate of #1', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '1'}]}
+```
+
+### Parse user mentions
+
+```text
+@user
+```
+```js
+{mentions: [{raw: '@user', prefix: '@', user: 'user'}]}
+```
+
+### Ignore keywords case
+
+```text
+FIX #1
+```
+```js
+{actions: [{raw: 'FIX #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}]}
+```
+
+### Ignore references in back-tick quotes
+
+```text
+Fix #1 `Fix #2` @user1 `@user2`
+```
+```js
+{
+  actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+  mentions: [{raw: '@user1', prefix: '@', user: 'user1'}]
+}
+```
+
+### Include references in escaped back-tick quotes
+
+```text
+\`Fix #1\` \`@user\`
+```
+```js
+{
+  actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+  mentions: [{raw: '@user1', prefix: '@', user: 'user1'}]
+}
+```
+
+### Ignore references in fenced blocks
+
+````text
+Fix #1
+
+```js
+console.log('Fix #2');
+```
+
+@user1
+
+```js
+console.log('@user1');
+```
+````
+```js
+{
+  actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+  mentions: [{raw: '@user1', prefix: '@', user: 'user1'}]
+}
+```
+
+### Include references in escaped fenced blocks
+
+```text
+\`\`\`
+Fix #1
+\`\`\`
+
+\`\`\`
+@user
+\`\`\`
+```
+```js
+{
+  actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+  mentions: [{raw: '@user', prefix: '@', user: 'user'}]
+}
+```
+
+### Ignore references in &lt;code&gt; tags
+
+```text
+Fix #1
+<code>Fix #2</code>
+<code><code>Fix #3</code></code>
+@user1
+<code>@user2</code>
+```
+```js
+{
+  actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+  mentions: [{raw: '@user1', prefix: '@', user: 'user1'}]
+}
+```
+
+### Include references in escaped &lt;code&gt; tags
+
+```text
+`<code>`Fix #1`</code>`
+`<code>`@user`</code>`
+```
+```js
+{
+  actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+  mentions: [{raw: '@user', prefix: '@', user: 'user'}]
+}
+```
+
+### Ignore malformed references
+
+```text
+Fix #1 Fix #2a Fix a#3
+```
+```js
+{actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}]}
+```
+
 ## API
 
 ### issueParser([options]) => parse
@@ -87,34 +253,33 @@ Create a [parser](#parsetext--result).
 
 #### options
 
-Type: `Object` `String`
-
+Type: `Object` `String`<br>
 Parser options. Can be `github`, `gitlab` or `bitbucket` for predefined options, or an object for custom options.
 
 ##### referenceActions
 
-Type: `Array<String>` `String`
+Type: `Array<String>` `String`<br>
 Default: `['close', 'closes', 'closed', 'closing', 'fix', 'fixes', 'fixed', 'fixing', 'resolve', 'resolves', 'resolved', 'resolving', 'implement', 'implements', 'implemented', 'implementing']`
 
 List of action keywords used to close issues and pull requests.
 
 ##### duplicateActions
 
-Type: `Array<String>` `String`
+Type: `Array<String>` `String`<br>
 Default: `['Duplicate of', '/duplicate']`
 
 List of keywords used to identify duplicate issues and pull requests.
 
 ##### mentionsPrefixes
 
-Type: `Array<String>` `String`
+Type: `Array<String>` `String`<br>
 Default: `['@']`
 
 List of keywords used to identify user mentions.
 
 ##### issuePrefixes
 
-Type: `Array<String>` `String`
+Type: `Array<String>` `String`<br>
 Default: `['#', 'gh-']`
 
 List of keywords used to identify issues and pull requests.
@@ -135,7 +300,8 @@ Issue text to parse.
 
 Type: `Array<Object>`
 
-List of issues and pull requests closed. Each action has the following properties:
+List of issues and pull requests closed.<br>
+Each action has the following properties:
 
 | Name   | Type     | Description                                                                           |
 |--------|----------|---------------------------------------------------------------------------------------|
@@ -149,7 +315,8 @@ List of issues and pull requests closed. Each action has the following propertie
 
 Type: `Array<Object>`
 
-List of issues and pull requests marked as duplicate. Each duplicate has the following properties:
+List of issues and pull requests marked as duplicate.<br>
+Each duplicate has the following properties:
 
 | Name   | Type     | Description                                                                           |
 |--------|----------|---------------------------------------------------------------------------------------|
@@ -163,7 +330,8 @@ List of issues and pull requests marked as duplicate. Each duplicate has the fol
 
 Type: `Array<Object>`
 
-List of issues and pull requests referenced, but not closed or marked as duplicates. Each reference has the following properties:
+List of issues and pull requests referenced, but not closed or marked as duplicates.<br>
+Each reference has the following properties:
 
 | Name   | Type     | Description                                                                           |
 |--------|----------|---------------------------------------------------------------------------------------|
@@ -176,7 +344,8 @@ List of issues and pull requests referenced, but not closed or marked as duplica
 
 Type: `Array<Object>`
 
-List of users mentioned. Each mention has the following properties:
+List of users mentioned.<br>
+Each mention has the following properties:
 
 | Name   | Type     | Description                                 |
 |--------|----------|---------------------------------------------|
@@ -188,7 +357,8 @@ List of users mentioned. Each mention has the following properties:
 
 Type: `Array<Object>`
 
-List of all issues and pull requests [closed](#actions), [marked as duplicate](#duplicates) or [referenced](#refs). Each reference has the following properties:
+List of all issues and pull requests [closed](#actions), [marked as duplicate](#duplicates) or [referenced](#refs).<br>
+Each reference has the following properties:
 
 | Name   | Type     | Description                                                                           |
 |--------|----------|---------------------------------------------------------------------------------------|
