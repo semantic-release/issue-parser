@@ -158,7 +158,7 @@ test('Parse mentions', t => {
 	t.deepEqual(m('github')('@user@user').mentions, [{raw: '@user', prefix: '@', user: 'user'}]);
 });
 
-test('Exclude code blocks', t => {
+test('Exclude code blocks with backtick', t => {
 	t.deepEqual(
 		m('github')(
 			`Fix #1, \\\`Fix #2\\\` \`Fix #3\` \`\\\`Fix #4\\\`\`
@@ -170,6 +170,28 @@ Fix #5
 			{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
 			{issue: '2', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #2'},
 		]
+	);
+});
+
+test('Exclude code blocks with html <code></code> tags', t => {
+	t.deepEqual(
+		m('github')(`Fix #1 <code>Fix #2</code> Fix #3 <code>
+Fix #4</code> <CODE> Fix#5</CODE> <code><code>Fix #6</code></code>`).actions,
+		[
+			{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+			{issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
+		]
+	);
+
+	t.deepEqual(m('github')(`Fix #1<code><code>Fix #2</code></code>`).actions, [
+		{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+	]);
+
+	t.deepEqual(
+		m('github')(`Fix #1<code><code>
+Fix #2
+</code></code>`).actions,
+		[{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'}]
 	);
 });
 

@@ -5,6 +5,7 @@ const hostConfig = require('./lib/hosts-config');
 
 const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
 const CODE_BLOCK_REGEXP = /(`(?![\\]))((?:.(?!\1(?![\\])))*.?)\1/g;
+const HTML_CODE_BLOCK_REGEXP = /(<code)+?((?!(<code|<\/code>)+?)[\S\s])*(<\/code>)+?/gim;
 
 function inverse(str) {
 	return str
@@ -43,9 +44,13 @@ function buildMentionRegexp(opts) {
 }
 
 function parse(text, regexp, mentionRegexp, opts) {
-	const noCodeBlock = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
 	let parsed;
 	const results = {actions: [], refs: [], duplicates: [], mentions: []};
+	let noCodeBlock = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
+
+	while (regexp.test(noCodeBlock)) {
+		noCodeBlock = noCodeBlock.replace(HTML_CODE_BLOCK_REGEXP, '');
+	}
 
 	while ((parsed = regexp.exec(noCodeBlock)) !== null) {
 		const raw = parsed[0].substring(parsed[0].indexOf(parsed[1] || parsed[2] || parsed[3]));
