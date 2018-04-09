@@ -25,7 +25,7 @@ $ npm install --save issue-parser
 const issueParser = require('issue-parser');
 const parse = issueParser('github');
 
-issueParser('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc @user');
+parse('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc @user');
 /*
 {
   refs: [{raw: 'user/package#1', slug: 'user/package', prefix: '#', issue: '1'}],
