@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const {escapeRegExp, capitalize, isUndefined, isString, isPlainObject} = require('lodash');
 const hostConfig = require('./lib/hosts-config');
 
 const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
@@ -15,7 +15,7 @@ function inverse(str) {
 }
 
 function join(keywords) {
-	return keywords.map(_.escapeRegExp).join('|');
+	return keywords.map(escapeRegExp).join('|');
 }
 
 function buildMentionsRegexp(opts) {
@@ -53,12 +53,9 @@ function parse(text, regexp, mentionRegexp, opts) {
 	}
 
 	while ((parsed = regexp.exec(noCodeBlock)) !== null) {
-		const raw = parsed[0].substring(parsed[0].indexOf(parsed[1] || parsed[2] || parsed[3]));
-		const action = _.capitalize(parsed[1]);
-		const slug = parsed[2];
-		const prefix = parsed[3];
-		const issue = parsed[4];
-		const mentions = parsed[5];
+		let [raw, action, slug, prefix, issue, mentions] = parsed;
+		raw = parsed[0].substring(parsed[0].indexOf(parsed[1] || parsed[2] || parsed[3]));
+		action = capitalize(parsed[1]);
 
 		if (opts.referenceActions.findIndex(fix => fix.toUpperCase() === action.toUpperCase()) > -1) {
 			results.actions.push({raw, action, slug, prefix, issue});
@@ -69,11 +66,9 @@ function parse(text, regexp, mentionRegexp, opts) {
 		} else if (mentions) {
 			let parsedMention;
 			while ((parsedMention = mentionRegexp.exec(mentions)) !== null) {
-				const rawMention = parsedMention[0].trim();
-				const prefixMention = parsedMention[1];
-				const user = parsedMention[2];
+				const [rawMention, prefixMention, user] = parsedMention;
 
-				results.mentions.push({raw: rawMention, prefix: prefixMention, user});
+				results.mentions.push({raw: rawMention.trim(), prefix: prefixMention, user});
 			}
 		}
 	}
@@ -81,19 +76,19 @@ function parse(text, regexp, mentionRegexp, opts) {
 }
 
 module.exports = options => {
-	if (!_.isUndefined(options) && !_.isString(options) && !_.isPlainObject(options)) {
+	if (!isUndefined(options) && !isString(options) && !isPlainObject(options)) {
 		throw new TypeError('Options must be a String or an Object');
 	}
 
-	const opts = Object.assign({}, hostConfig.default, _.isString(options) ? hostConfig[options.toLowerCase()] : options);
+	const opts = Object.assign({}, hostConfig.default, isString(options) ? hostConfig[options.toLowerCase()] : options);
 
 	for (const opt of Object.keys(opts)) {
-		if (_.isString(opts[opt])) {
+		if (isString(opts[opt])) {
 			opts[opt] = [opts[opt]];
 		} else if (!Array.isArray(opts[opt])) {
 			throw new TypeError(`The ${opt} option must be a string or an array of strings`);
 		}
-		if (opts[opt].length !== 0 && !opts[opt].every(opt => _.isString(opt))) {
+		if (opts[opt].length !== 0 && !opts[opt].every(opt => isString(opt))) {
 			throw new TypeError(`The ${opt} option must be a string or an array of strings`);
 		}
 		opts[opt] = opts[opt].filter(Boolean);
@@ -103,7 +98,7 @@ module.exports = options => {
 	const mentionRegexp = buildMentionRegexp(opts);
 
 	return text => {
-		if (!_.isString(text) || !text.trim()) {
+		if (!isString(text) || !text.trim()) {
 			throw new TypeError('The issue text must be a String');
 		}
 
