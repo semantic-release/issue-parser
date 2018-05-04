@@ -104,7 +104,7 @@ module.exports = options => {
 
 		const results = parse(text, regexp, mentionRegexp, opts);
 
-		Object.defineProperty(results, 'allRefs', {
+		Reflect.defineProperty(results, 'allRefs', {
 			get() {
 				return this.actions.concat(this.refs, this.duplicates);
 			},
