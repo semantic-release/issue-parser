@@ -98,7 +98,7 @@ module.exports = options => {
 	const mentionRegexp = buildMentionRegexp(opts);
 
 	return text => {
-		if (!isString(text) || !text.trim()) {
+		if (!isString(text)) {
 			throw new TypeError('The issue text must be a String');
 		}
 
