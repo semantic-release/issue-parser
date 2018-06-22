@@ -214,6 +214,13 @@ test('Empty options', t => {
 	);
 });
 
+test('Empty String', t => {
+	const empty = {actions: [], duplicates: [], mentions: [], refs: []};
+
+	t.deepEqual(m()('   '), empty);
+	t.deepEqual(m()(''), empty);
+});
+
 test('Throw TypeError for invalid options', t => {
 	t.throws(() => m([]), TypeError);
 	t.throws(() => m(1), TypeError);
@@ -226,5 +233,4 @@ test('Throw TypeError for invalid input', t => {
 	t.throws(() => m()(1), TypeError);
 	t.throws(() => m()({}), TypeError);
 	t.throws(() => m()([]), TypeError);
-	t.throws(() => m()(''), TypeError);
 });
