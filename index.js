@@ -1,6 +1,9 @@
 'use strict';
 
-const {escapeRegExp, capitalize, isUndefined, isString, isPlainObject} = require('lodash');
+const escapeRegExp = require('lodash.escaperegexp');
+const capitalize = require('lodash.capitalize');
+const isString = require('lodash.isstring');
+const isPlainObject = require('lodash.isplainobject');
 const hostConfig = require('./lib/hosts-config');
 
 const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
