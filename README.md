@@ -42,12 +42,15 @@ parse('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc @user'
 const issueParser = require('issue-parser');
 const parse = issueParser('gitlab');
 
-issueParser('Issue description, ref group/user/package#1, implement #2, /duplicate #3 /cc @user');
+issueParser('Issue description, ref group/user/package#1, !2, implement #3, /duplicate #4 /cc @user');
 /*
 {
-  refs: [{raw: 'group/user/package#1', slug: 'group/user/package', prefix: '#', issue: '1'}],
-  actions: [{raw: 'implement #2', action: 'Implement', prefix: '#', issue: '2'}],
-  duplicates: [{raw: 'Duplicate of #3', action: 'Duplicate of', prefix: '#', issue: '3'}],
+  refs: [
+    {raw: 'group/user/package#1', slug: 'group/user/package', prefix: '#', issue: '1'},
+    {raw: '!2', slug: 'group/user/package', prefix: '!', issue: '2'},
+  ],
+  actions: [{raw: 'implement #3', action: 'Implement', prefix: '#', issue: '4'}],
+  duplicates: [{raw: 'Duplicate of #4', action: 'Duplicate of', prefix: '#', issue: '4'}],
   mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 }
 */
