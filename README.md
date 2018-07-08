@@ -59,7 +59,7 @@ issueParser('Issue description, ref group/user/package#1, !2, implement #3, /dup
 ### Bitbucket format
 
 ```js
-const issueParser = require('issue-parser')
+const issueParser = require('issue-parser');
 const parse = issueParser('bitbucket');
 
 issueParser('Issue description, ref user/package#1, fixing #2. /cc @user');
@@ -76,7 +76,7 @@ issueParser('Issue description, ref user/package#1, fixing #2. /cc @user');
 ### Custom format
 
 ```js
-const issueParser = require('issue-parser')
+const issueParser = require('issue-parser');
 const parse = issueParser({referenceActions: ['complete'], issuePrefixes: ['🐛']});
 
 issueParser('Issue description, related to user/package🐛1, Complete 🐛2');
@@ -266,7 +266,7 @@ Fix #1 Fix #2a Fix a#3
 
 ## API
 
-### issueParser([options]) => parse
+### issueParser([options], [overrides]) => parse
 
 Create a [parser](#parsetext--result).
 
@@ -316,6 +316,17 @@ Type: `Array<String>` `String`<br>
 Default: `['issues', 'pull', 'merge_requests']`
 
 List of URL segment used to identify issues and pull requests with [full URL](#parse-references-with-full-issue-url).
+
+#### overrides
+
+Type: `Object`<br>
+Option overrides. Useful when using predefined [`options`](#options) (such as `github`, `gitlab` or `bitbucket`). The `overrides` object can define the same properties as [`options`](#options). 
+
+For example, the following will use all the `github` predefined options but with a different `hosts` option:
+```js
+const issueParser = require('issue-parser');
+const parse = issueParser('github', {hosts: ['https://custom-url.com']});
+```
 
 ### parse(text) => Result
 

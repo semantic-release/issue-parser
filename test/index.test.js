@@ -135,6 +135,35 @@ test('Parse with custom options', t => {
 	);
 });
 
+test('Parse with options overrides', t => {
+	t.deepEqual(
+		m('default', {
+			referenceActions: ['fix'],
+			duplicateActions: [],
+			mentionsPrefixes: '!',
+			issuePrefixes: ['#'],
+			hosts: ['http://host1.com/', 'http://host2.com'],
+			issueURLSegments: ['bugs'],
+		})(
+			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fixed o/r#4 #5 o/r#6 fixing #7 http://host1.com/o/r/bugs/8 http://host2.com/o/r/bugs/9 Duplicate OF #10 !user @other'
+		),
+		{
+			actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+			refs: [
+				{raw: 'o/r#4', slug: 'o/r', prefix: '#', issue: '4'},
+				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
+				{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
+				{raw: '#7', slug: undefined, prefix: '#', issue: '7'},
+				{raw: 'http://host1.com/o/r/bugs/8', slug: 'o/r', prefix: undefined, issue: '8'},
+				{raw: 'http://host2.com/o/r/bugs/9', slug: 'o/r', prefix: undefined, issue: '9'},
+				{raw: '#10', slug: undefined, prefix: '#', issue: '10'},
+			],
+			duplicates: [],
+			mentions: [{raw: '!user', prefix: '!', user: 'user'}],
+		}
+	);
+});
+
 test('"allRefs" returns "refs", "actions" and "duplicates"', t => {
 	t.deepEqual(m('github')('Fix #1 #2 Duplicate of #3').allRefs, [
 		{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'},
@@ -269,10 +298,20 @@ test('Empty String', t => {
 });
 
 test('Throw TypeError for invalid options', t => {
+	t.throws(() => m('missing-option'), TypeError);
 	t.throws(() => m([]), TypeError);
 	t.throws(() => m(1), TypeError);
 	t.throws(() => m({referenceActions: 1}), TypeError);
 	t.throws(() => m({referenceActions: [1]}), TypeError);
+});
+
+test('Throw TypeError for invalid overrides', t => {
+	t.throws(() => m({}, []), TypeError);
+	t.throws(() => m({}, 1), TypeError);
+	t.throws(() => m({}, {referenceActions: 1}), TypeError);
+	t.throws(() => m({}, {referenceActions: [1]}), TypeError);
+	t.throws(() => m({}, ''), TypeError);
+	t.throws(() => m({}, 'string'), TypeError);
 });
 
 test('Throw TypeError for invalid input', t => {

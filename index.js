@@ -103,12 +103,25 @@ function parse(text, regexp, mentionRegexp, {issuePrefixes, hosts, referenceActi
 	return results;
 }
 
-module.exports = options => {
-	if (options !== undefined && !isString(options) && !isPlainObject(options)) {
+module.exports = (options = 'default', overrides = {}) => {
+	if (!isString(options) && !isPlainObject(options)) {
 		throw new TypeError('Options must be a String or an Object');
 	}
 
-	const opts = Object.assign({}, hostConfig.default, isString(options) ? hostConfig[options.toLowerCase()] : options);
+	if (isString(options) && !includesIgnoreCase(Object.keys(hostConfig), options)) {
+		throw new TypeError(`The supported configuration are [${Object.keys(hostConfig).join(', ')}], got '${options}'`);
+	}
+
+	if (!isPlainObject(overrides)) {
+		throw new TypeError('Override must be an Object');
+	}
+
+	const opts = Object.assign(
+		{},
+		hostConfig.default,
+		isString(options) ? hostConfig[options.toLowerCase()] : options,
+		overrides
+	);
 
 	for (const opt of Object.keys(opts)) {
 		if (isString(opts[opt])) {
