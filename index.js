@@ -9,6 +9,8 @@ const hostConfig = require('./lib/hosts-config');
 const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
 const CODE_BLOCK_REGEXP = /(`(?![\\]))((?:.(?!\1(?![\\])))*.?)\1/g;
 const HTML_CODE_BLOCK_REGEXP = /(<code)+?((?!(<code|<\/code>)+?)[\S\s])*(<\/code>)+?/gim;
+const LEADING_TRAILING_SLASH_REGEXP = /^\/?([^/]+(?:\/[^/]+)*)\/?$/;
+const TRAILING_SLASH_REGEXP = /\/?$/;
 
 function inverse(str) {
 	return str
@@ -18,19 +20,34 @@ function inverse(str) {
 }
 
 function join(keywords) {
-	return keywords.map(escapeRegExp).join('|');
+	return keywords
+		.filter(Boolean)
+		.map(escapeRegExp)
+		.join('|');
 }
 
-function buildMentionsRegexp(opts) {
-	return `((?:(?:[^\\w\\n\\v\\r]|^)+(?:${join(opts.mentionsPrefixes)})[\\w-\\.]+[^\\W])+)`;
+function addLeadingAndTrailingSlash(value) {
+	return value.replace(LEADING_TRAILING_SLASH_REGEXP, '/$1/');
 }
 
-function buildRefRegexp(opts) {
-	return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join([].concat(opts.referenceActions, opts.duplicateActions))}))?(?:${[
-		'[^\\w\\n\\v\\r]|^',
-	]
-		.concat(join(opts.issuePrefixes))
-		.join('|')})+((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join(opts.issuePrefixes)})(\\d+)(?!\\w)`;
+function addTrailingSlash(value) {
+	return value.replace(TRAILING_SLASH_REGEXP, '/');
+}
+
+function includesIgnoreCase(arr, value) {
+	return arr.findIndex(val => val.toUpperCase() === value.toUpperCase()) > -1;
+}
+
+function buildMentionsRegexp({mentionsPrefixes}) {
+	return `((?:(?:[^\\w\\n\\v\\r]|^)+(?:${join(mentionsPrefixes)})[\\w-\\.]+[^\\W])+)`;
+}
+
+function buildRefRegexp({referenceActions, duplicateActions, issuePrefixes, issueURLSegments, hosts}) {
+	return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join([].concat(referenceActions, duplicateActions))}))?(?:${['[^\\w\\n\\v\\r]|^']
+		.concat(join(issuePrefixes.concat(issueURLSegments)))
+		.join('|')})+${hosts.length > 0 ? `(?:${join(hosts)})?` : ''}((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join(
+		issuePrefixes.concat(issueURLSegments)
+	)})(\\d+)(?!\\w)`;
 }
 
 function buildRegexp(opts) {
@@ -42,11 +59,11 @@ function buildRegexp(opts) {
 	);
 }
 
-function buildMentionRegexp(opts) {
-	return new RegExp(`(${join(opts.mentionsPrefixes)})([\\w-.]+)`, 'gim');
+function buildMentionRegexp({mentionsPrefixes}) {
+	return new RegExp(`(${join(mentionsPrefixes)})([\\w-.]+)`, 'gim');
 }
 
-function parse(text, regexp, mentionRegexp, opts) {
+function parse(text, regexp, mentionRegexp, {issuePrefixes, hosts, referenceActions, duplicateActions}) {
 	let parsed;
 	const results = {actions: [], refs: [], duplicates: [], mentions: []};
 	let noCodeBlock = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
@@ -57,12 +74,20 @@ function parse(text, regexp, mentionRegexp, opts) {
 
 	while ((parsed = regexp.exec(noCodeBlock)) !== null) {
 		let [raw, action, slug, prefix, issue, mentions] = parsed;
-		raw = parsed[0].substring(parsed[0].indexOf(parsed[1] || parsed[2] || parsed[3]));
+		prefix =
+			prefix && issuePrefixes.some(issuePrefix => issuePrefix.toUpperCase() === prefix.toUpperCase())
+				? prefix
+				: undefined;
+		raw = parsed[0].substring(
+			parsed[0].indexOf(
+				parsed[1] || hosts.find(host => parsed[0].toUpperCase().includes(host.toUpperCase())) || parsed[2] || parsed[3]
+			)
+		);
 		action = capitalize(parsed[1]);
 
-		if (opts.referenceActions.findIndex(fix => fix.toUpperCase() === action.toUpperCase()) > -1) {
+		if (includesIgnoreCase(referenceActions, action)) {
 			results.actions.push({raw, action, slug, prefix, issue});
-		} else if (opts.duplicateActions.findIndex(duplicate => duplicate.toUpperCase() === action.toUpperCase()) > -1) {
+		} else if (includesIgnoreCase(duplicateActions, action)) {
 			results.duplicates.push({raw, action, slug, prefix, issue});
 		} else if (issue) {
 			results.refs.push({raw, slug, prefix, issue});
@@ -79,7 +104,7 @@ function parse(text, regexp, mentionRegexp, opts) {
 }
 
 module.exports = options => {
-	if (!isUndefined(options) && !isString(options) && !isPlainObject(options)) {
+	if (options !== undefined && !isString(options) && !isPlainObject(options)) {
 		throw new TypeError('Options must be a String or an Object');
 	}
 
@@ -96,6 +121,9 @@ module.exports = options => {
 		}
 		opts[opt] = opts[opt].filter(Boolean);
 	}
+
+	opts.hosts = opts.hosts.map(addTrailingSlash);
+	opts.issueURLSegments = opts.issueURLSegments.map(addLeadingAndTrailingSlash);
 
 	const regexp = buildRegexp(opts);
 	const mentionRegexp = buildMentionRegexp(opts);

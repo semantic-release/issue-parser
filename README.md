@@ -137,6 +137,22 @@ Duplicate of #1
 {mentions: [{raw: '@user', prefix: '@', user: 'user'}]}
 ```
 
+### Parse references with full issue URL
+
+```text
+https://github.com/owner/repo/pull/1
+
+Fix https://github.com/owner/repo/issues/2
+```
+```js
+{
+  refs: [{raw: 'https://github.com/owner/repo/pull/1', slug: 'owner/repo', prefix: undefined, issue: '1'},]
+  actions: [
+    {raw: 'Fix https://github.com/owner/repo/issues/2', action: 'Fix', slug: 'owner/repo', prefix: undefined, issue: '2'}
+  ]
+}
+```
+
 ### Ignore keywords case
 
 ```text
@@ -286,6 +302,20 @@ Type: `Array<String>` `String`<br>
 Default: `['#', 'gh-']`
 
 List of keywords used to identify issues and pull requests.
+
+##### hosts
+
+Type: `Array<String>` `String`<br>
+Default: `['https://github.com', 'https://gitlab.com']`
+
+List of base URL used to identify issues and pull requests with [full URL](#parse-references-with-full-issue-url).
+
+##### issueURLSegments
+
+Type: `Array<String>` `String`<br>
+Default: `['issues', 'pull', 'merge_requests']`
+
+List of URL segment used to identify issues and pull requests with [full URL](#parse-references-with-full-issue-url).
 
 ### parse(text) => Result
 
