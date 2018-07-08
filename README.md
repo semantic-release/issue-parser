@@ -198,7 +198,7 @@ console.log('Fix #2');
 @user1
 
 ```js
-console.log('@user1');
+console.log('@user2');
 ```
 ````
 ```js
@@ -320,7 +320,7 @@ List of URL segment used to identify issues and pull requests with [full URL](#p
 #### overrides
 
 Type: `Object`<br>
-Option overrides. Useful when using predefined [`options`](#options) (such as `github`, `gitlab` or `bitbucket`). The `overrides` object can define the same properties as [`options`](#options). 
+Option overrides. Useful when using predefined [`options`](#options) (such as `github`, `gitlab` or `bitbucket`). The `overrides` object can define the same properties as [`options`](#options).
 
 For example, the following will use all the `github` predefined options but with a different `hosts` option:
 ```js
