@@ -42,7 +42,7 @@ parse('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc @user'
 const issueParser = require('issue-parser');
 const parse = issueParser('gitlab');
 
-issueParser('Issue description, ref group/user/package#1, !2, implement #3, /duplicate #4 /cc @user');
+parse('Issue description, ref group/user/package#1, !2, implement #3, /duplicate #4 /cc @user');
 /*
 {
   refs: [
@@ -62,7 +62,7 @@ issueParser('Issue description, ref group/user/package#1, !2, implement #3, /dup
 const issueParser = require('issue-parser');
 const parse = issueParser('bitbucket');
 
-issueParser('Issue description, ref user/package#1, fixing #2. /cc @user');
+parse('Issue description, ref user/package#1, fixing #2. /cc @user');
 /*
 {
   refs: [{raw: 'user/package#1', slug: 'user/package', prefix: '#', issue: '1'}],
@@ -79,7 +79,7 @@ issueParser('Issue description, ref user/package#1, fixing #2. /cc @user');
 const issueParser = require('issue-parser');
 const parse = issueParser({referenceActions: ['complete'], issuePrefixes: ['🐛']});
 
-issueParser('Issue description, related to user/package🐛1, Complete 🐛2');
+parse('Issue description, related to user/package🐛1, Complete 🐛2');
 /*
 {
   refs: [{raw: 'user/package🐛1', slug: 'user/package', prefix: '🐛', issue: '1'}],
