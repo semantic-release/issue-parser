@@ -1,6 +1,6 @@
 # issue-parser
 
-Parser for Github, GitLab and Bitbucket issues actions, references and mentions
+Parser for [Github](https://github.com), [GitLab](https://gitlab.com), [Bitbucket](https://bitbucket.org) and [Waffle](https://waffle.io) issues actions, references and mentions
 
 [![Travis](https://img.shields.io/travis/pvdlg/issue-parser.svg)](https://travis-ci.org/pvdlg/issue-parser)
 [![Codecov](https://img.shields.io/codecov/c/github/pvdlg/issue-parser.svg)](https://codecov.io/gh/pvdlg/issue-parser)
@@ -10,6 +10,7 @@ The parser can identify:
 - GitHub [closing keywords](https://help.github.com/articles/closing-issues-using-keywords), [duplicate keyword](https://help.github.com/articles/about-duplicate-issues-and-pull-requests), [issue references](https://guides.github.com/features/issues/#notifications) and [user mentions](https://guides.github.com/features/issues/#notifications)
 - GitLab [closing keywords](https://docs.gitlab.com/ee/user/project/issues/automatic_issue_closing.html), [duplicate keyword](https://gitlab.com/gitlab-org/gitlab-ce/merge_requests/12845), [issue references](https://about.gitlab.com/2016/03/08/gitlab-tutorial-its-all-connected) and [user mentions](https://about.gitlab.com/2016/03/08/gitlab-tutorial-its-all-connected)
 - Bitbucket [closing keywords](https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html), [issue references](https://confluence.atlassian.com/bitbucket/mark-up-comments-issues-and-commit-messages-321859781.html) and [user mentions](https://confluence.atlassian.com/bitbucket/mark-up-comments-issues-and-commit-messages-321859781.html)
+- Waffle.io [epics](https://help.waffle.io/epics/which-keywords-are-supported-with-epics) and [dependencies](https://help.waffle.io/dependencies/which-keywords-are-supported-with-dependencies) keywords
 
 ## Install
 
@@ -67,7 +68,26 @@ parse('Issue description, ref user/package#1, fixing #2. /cc @user');
 {
   refs: [{raw: 'user/package#1', slug: 'user/package', prefix: '#', issue: '1'}],
   actions: [{raw: 'fixing #2', action: 'Fixing', prefix: '#', issue: '2'}],
-  duplicates: [],
+  mentions: [{raw: '@user', prefix: '@', user: 'user'}],
+}
+*/
+```
+
+### Waffle format
+
+```js
+const issueParser = require('issue-parser');
+const parse = issueParser('waffle');
+
+parse('Issue description, ref user/package#1, Fix #2, blocks user/package#3, Require #4, Parent of #5, Child of #6 /cc @user');
+/*
+{
+  refs: [{raw: 'user/package#1', slug: 'user/package', prefix: '#', issue: '1'}],
+  actions: [{raw: 'Fix #2', action: 'Fix', prefix: '#', issue: '2'}],
+  blocks: [{raw: 'blocks user/package#3', action: 'Blocks', slug: 'user/package', prefix: '#', issue: '3'}],
+  requires: [{raw: 'Require #4', action: 'Require', prefix: '#', issue: '4'}],
+  parentOf: [{raw: 'Parent of #5', action: 'Parent of', prefix: '#', issue: '5'}],
+  childOf: [{raw: 'Child of #6', action: 'Child of', prefix: '#', issue: '6'}],
   mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 }
 */
@@ -77,15 +97,14 @@ parse('Issue description, ref user/package#1, fixing #2. /cc @user');
 
 ```js
 const issueParser = require('issue-parser');
-const parse = issueParser({referenceActions: ['complete'], issuePrefixes: ['🐛']});
+const parse = issueParser({referenceActions: ['complete'], blocksActions: ['holds up'], issuePrefixes: ['🐛']});
 
-parse('Issue description, related to user/package🐛1, Complete 🐛2');
+parse('Issue description, related to user/package🐛1, Complete 🐛2, holds up 🐛3');
 /*
 {
   refs: [{raw: 'user/package🐛1', slug: 'user/package', prefix: '🐛', issue: '1'}],
   actions: [{raw: 'Complete 🐛2', action: 'Complete', prefix: '🐛', issue: '2'}],
-  duplicates: [],
-  mentions: [],
+  blocks: [{raw: 'holds up 🐛3', action: 'Holds up', prefix: '🐛', issue: '3'}],
 }
 */
 ```
@@ -282,6 +301,34 @@ Default: `['close', 'closes', 'closed', 'closing', 'fix', 'fixes', 'fixed', 'fix
 
 List of action keywords used to close issues and pull requests.
 
+##### blocksActions
+
+Type: `Array<String>` `String`<br>
+Default: `['blocks', 'block', 'required by', 'needed by', 'dependency of']`
+
+List of action keywords used to make an issue or pull request block another one.
+
+##### requiresActions
+
+Type: `Array<String>` `String`<br>
+Default: `['blocked by', 'requires', 'require', 'need', 'needs', 'depends on']`
+
+List of action keywords used to make an issue or pull request blocked by another one.
+
+##### parentOfActions
+
+Type: `Array<String>` `String`<br>
+Default: `['parent of', 'parent to', 'parent']`
+
+List of action keywords used to make an issue or pull request the parent of another one.
+
+##### childOfActions
+
+Type: `Array<String>` `String`<br>
+Default: `['child of', 'child to', 'child']`
+
+List of action keywords used to make an issue or pull request the child of another one.
+
 ##### duplicateActions
 
 Type: `Array<String>` `String`<br>
@@ -355,6 +402,66 @@ Each action has the following properties:
 | prefix | `String` | The prefix used to identify the issue.                                                |
 | issue  | `String` | The issue number.                                                                     |
 
+#### blocks
+
+Type: `Array<Object>`
+
+List of issues and pull requests blocked.<br>
+Each action has the following properties:
+
+| Name   | Type     | Description                                                                           |
+|--------|----------|---------------------------------------------------------------------------------------|
+| raw    | `String` | The raw value parsed, for example `Blocks #1`.                                        |
+| action | `String` | The keyword used to identify the action, capitalized.                                 |
+| slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`. |
+| prefix | `String` | The prefix used to identify the issue.                                                |
+| issue  | `String` | The issue number.                                                                     |
+
+#### requires
+
+Type: `Array<Object>`
+
+List of issues and pull requests required.<br>
+Each action has the following properties:
+
+| Name   | Type     | Description                                                                           |
+|--------|----------|---------------------------------------------------------------------------------------|
+| raw    | `String` | The raw value parsed, for example `Requires #1`.                                      |
+| action | `String` | The keyword used to identify the action, capitalized.                                 |
+| slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`. |
+| prefix | `String` | The prefix used to identify the issue.                                                |
+| issue  | `String` | The issue number.                                                                     |
+
+#### parentOf
+
+Type: `Array<Object>`
+
+List of child issues and pull requests.<br>
+Each action has the following properties:
+
+| Name   | Type     | Description                                                                           |
+|--------|----------|---------------------------------------------------------------------------------------|
+| raw    | `String` | The raw value parsed, for example `Parent of #1`.                                     |
+| action | `String` | The keyword used to identify the action, capitalized.                                 |
+| slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`. |
+| prefix | `String` | The prefix used to identify the issue.                                                |
+| issue  | `String` | The issue number.                                                                     |
+
+#### childOf
+
+Type: `Array<Object>`
+
+List of parent issues and pull requests.<br>
+Each action has the following properties:
+
+| Name   | Type     | Description                                                                           |
+|--------|----------|---------------------------------------------------------------------------------------|
+| raw    | `String` | The raw value parsed, for example `Child of #1`.                                      |
+| action | `String` | The keyword used to identify the action, capitalized.                                 |
+| slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`. |
+| prefix | `String` | The prefix used to identify the issue.                                                |
+| issue  | `String` | The issue number.                                                                     |
+
 #### duplicates
 
 Type: `Array<Object>`
@@ -364,7 +471,7 @@ Each duplicate has the following properties:
 
 | Name   | Type     | Description                                                                           |
 |--------|----------|---------------------------------------------------------------------------------------|
-| raw    | `String` | The raw value parsed, for example `Fix #1`.                                           |
+| raw    | `String` | The raw value parsed, for example `Duplicate of #1`.                                  |
 | action | `String` | The keyword used to identify the duplicate, capitalized.                              |
 | slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`. |
 | prefix | `String` | The prefix used to identify the issue.                                                |
@@ -379,7 +486,7 @@ Each reference has the following properties:
 
 | Name   | Type     | Description                                                                           |
 |--------|----------|---------------------------------------------------------------------------------------|
-| raw    | `String` | The raw value parsed, for example `Fix #1`.                                           |
+| raw    | `String` | The raw value parsed, for example `#1`.                                               |
 | slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`. |
 | prefix | `String` | The prefix used to identify the issue.                                                |
 | issue  | `String` | The issue number.                                                                     |
@@ -393,7 +500,7 @@ Each mention has the following properties:
 
 | Name   | Type     | Description                                 |
 |--------|----------|---------------------------------------------|
-| raw    | `String` | The raw value parsed, for example `Fix #1`. |
+| raw    | `String` | The raw value parsed, for example `@user`.  |
 | prefix | `String` | The prefix used to identify the mention.    |
 | user   | `String` | The user name                               |
 
