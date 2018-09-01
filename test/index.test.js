@@ -15,6 +15,11 @@ test('Parse GitHub issue', t => {
 				{raw: 'fix https://github.com/o/r/issues/7', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '7'},
 				{raw: 'fix https://github.com/o/r/pull/9', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '9'},
 			],
+			blocks: [],
+			requires: [],
+			parentOf: [],
+			childOf: [],
+			duplicates: [{raw: 'Duplicate OF #12', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '12'}],
 			refs: [
 				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
 				{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
@@ -22,7 +27,6 @@ test('Parse GitHub issue', t => {
 				{raw: 'https://github.com/o/r/pull/10', slug: 'o/r', prefix: undefined, issue: '10'},
 				{raw: '#11', slug: undefined, prefix: '#', issue: '11'},
 			],
-			duplicates: [{raw: 'Duplicate OF #12', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '12'}],
 			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 		}
 	);
@@ -37,12 +41,16 @@ test('Parse Bitbucket issue', t => {
 			{raw: 'fix o/r#4', action: 'Fix', slug: 'o/r', prefix: '#', issue: '4'},
 			{raw: 'fixing #7', action: 'Fixing', slug: undefined, prefix: '#', issue: '7'},
 		],
+		blocks: [],
+		requires: [],
+		parentOf: [],
+		childOf: [],
+		duplicates: [],
 		refs: [
 			{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
 			{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
 			{raw: '#8', slug: undefined, prefix: '#', issue: '8'},
 		],
-		duplicates: [],
 		mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 	});
 });
@@ -63,13 +71,56 @@ test('Parse GitLab issue', t => {
 				{raw: 'fixing #11', action: 'Fixing', slug: undefined, prefix: '#', issue: '11'},
 				{raw: 'fixing !12', action: 'Fixing', slug: undefined, prefix: '!', issue: '12'},
 			],
+			blocks: [],
+			requires: [],
+			parentOf: [],
+			childOf: [],
+			duplicates: [{raw: '/duplicate #13', action: '/duplicate', slug: undefined, prefix: '#', issue: '13'}],
 			refs: [
 				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
 				{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
 				{raw: 'https://gitlab.com/o/r/issues/8', slug: 'o/r', prefix: undefined, issue: '8'},
 				{raw: 'https://gitlab.com/o/r/merge_requests/10', slug: 'o/r', prefix: undefined, issue: '10'},
 			],
-			duplicates: [{raw: '/duplicate #13', action: '/duplicate', slug: undefined, prefix: '#', issue: '13'}],
+			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
+		}
+	);
+});
+
+test('Parse Waffle issue', t => {
+	t.deepEqual(
+		m('Waffle')(
+			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 fix https://github.com/o/r/issues/7 https://github.com/o/r/issues/8 fix https://github.com/o/r/pull/9 https://github.com/o/r/pull/10 fixing #11 Duplicate OF #12 @user BloCks #13 Requires o/r#14 parent of https://github.com/o/r/issues/15 child to Gh-16'
+		),
+		{
+			actions: [
+				{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'},
+				{raw: 'reSOLved gh-2', action: 'Resolved', slug: undefined, prefix: 'gh-', issue: '2'},
+				{raw: 'CLOSES Gh-3', action: 'Closes', slug: undefined, prefix: 'Gh-', issue: '3'},
+				{raw: 'fix o/r#4', action: 'Fix', slug: 'o/r', prefix: '#', issue: '4'},
+				{raw: 'fix https://github.com/o/r/issues/7', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '7'},
+				{raw: 'fix https://github.com/o/r/pull/9', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '9'},
+			],
+			blocks: [{raw: 'BloCks #13', action: 'Blocks', slug: undefined, prefix: '#', issue: '13'}],
+			requires: [{raw: 'Requires o/r#14', action: 'Requires', slug: 'o/r', prefix: '#', issue: '14'}],
+			parentOf: [
+				{
+					raw: 'parent of https://github.com/o/r/issues/15',
+					action: 'Parent of',
+					slug: 'o/r',
+					prefix: undefined,
+					issue: '15',
+				},
+			],
+			childOf: [{raw: 'child to Gh-16', action: 'Child to', slug: undefined, prefix: 'Gh-', issue: '16'}],
+			duplicates: [{raw: 'Duplicate OF #12', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '12'}],
+			refs: [
+				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
+				{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
+				{raw: 'https://github.com/o/r/issues/8', slug: 'o/r', prefix: undefined, issue: '8'},
+				{raw: 'https://github.com/o/r/pull/10', slug: 'o/r', prefix: undefined, issue: '10'},
+				{raw: '#11', slug: undefined, prefix: '#', issue: '11'},
+			],
 			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 		}
 	);
@@ -95,12 +146,16 @@ test('Parse with default options', t => {
 					issue: '9',
 				},
 			],
+			blocks: [],
+			requires: [],
+			parentOf: [],
+			childOf: [],
+			duplicates: [{raw: 'Duplicate OF #10', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '10'}],
 			refs: [
 				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
 				{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
 				{raw: 'https://github.com/o/r/issues/8', slug: 'o/r', prefix: undefined, issue: '8'},
 			],
-			duplicates: [{raw: 'Duplicate OF #10', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '10'}],
 			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 		}
 	);
@@ -120,6 +175,11 @@ test('Parse with custom options', t => {
 		),
 		{
 			actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+			blocks: [],
+			requires: [],
+			parentOf: [],
+			childOf: [],
+			duplicates: [],
 			refs: [
 				{raw: 'o/r#4', slug: 'o/r', prefix: '#', issue: '4'},
 				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
@@ -129,7 +189,6 @@ test('Parse with custom options', t => {
 				{raw: 'http://host2.com/o/r/bugs/9', slug: 'o/r', prefix: undefined, issue: '9'},
 				{raw: '#10', slug: undefined, prefix: '#', issue: '10'},
 			],
-			duplicates: [],
 			mentions: [{raw: '!user', prefix: '!', user: 'user'}],
 		}
 	);
@@ -149,6 +208,11 @@ test('Parse with options overrides', t => {
 		),
 		{
 			actions: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+			blocks: [],
+			requires: [],
+			parentOf: [],
+			childOf: [],
+			duplicates: [],
 			refs: [
 				{raw: 'o/r#4', slug: 'o/r', prefix: '#', issue: '4'},
 				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
@@ -158,7 +222,6 @@ test('Parse with options overrides', t => {
 				{raw: 'http://host2.com/o/r/bugs/9', slug: 'o/r', prefix: undefined, issue: '9'},
 				{raw: '#10', slug: undefined, prefix: '#', issue: '10'},
 			],
-			duplicates: [],
 			mentions: [{raw: '!user', prefix: '!', user: 'user'}],
 		}
 	);
@@ -173,7 +236,16 @@ test('"allRefs" returns "refs", "actions" and "duplicates"', t => {
 });
 
 test('Ignore malformed references', t => {
-	const empty = {actions: [], duplicates: [], mentions: [], refs: []};
+	const empty = {
+		actions: [],
+		blocks: [],
+		requires: [],
+		parentOf: [],
+		childOf: [],
+		duplicates: [],
+		mentions: [],
+		refs: [],
+	};
 
 	t.deepEqual(m('github')('Test#3'), empty);
 	t.deepEqual(m('github')('Fix repo#3'), empty);
@@ -204,6 +276,66 @@ test('Parse actions', t => {
 	t.deepEqual(m('github')('fix #1, CLOSE #2').actions, [
 		{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'fix #1'},
 		{issue: '2', action: 'Close', slug: undefined, prefix: '#', raw: 'CLOSE #2'},
+	]);
+});
+
+test('Parse blocks', t => {
+	t.deepEqual(m('waffle')('Blocks #1, Block #2').blocks, [
+		{issue: '1', action: 'Blocks', slug: undefined, prefix: '#', raw: 'Blocks #1'},
+		{issue: '2', action: 'Block', slug: undefined, prefix: '#', raw: 'Block #2'},
+	]);
+	t.deepEqual(m('waffle')('Blocks #1,Block #2').blocks, [
+		{issue: '1', action: 'Blocks', slug: undefined, prefix: '#', raw: 'Blocks #1'},
+		{issue: '2', action: 'Block', slug: undefined, prefix: '#', raw: 'Block #2'},
+	]);
+	t.deepEqual(m('waffle')('blocks #1, BLOCK #2').blocks, [
+		{issue: '1', action: 'Blocks', slug: undefined, prefix: '#', raw: 'blocks #1'},
+		{issue: '2', action: 'Block', slug: undefined, prefix: '#', raw: 'BLOCK #2'},
+	]);
+});
+
+test('Parse requires', t => {
+	t.deepEqual(m('waffle')('Requires #1, Require #2').requires, [
+		{issue: '1', action: 'Requires', slug: undefined, prefix: '#', raw: 'Requires #1'},
+		{issue: '2', action: 'Require', slug: undefined, prefix: '#', raw: 'Require #2'},
+	]);
+	t.deepEqual(m('waffle')('Requires #1,Require #2').requires, [
+		{issue: '1', action: 'Requires', slug: undefined, prefix: '#', raw: 'Requires #1'},
+		{issue: '2', action: 'Require', slug: undefined, prefix: '#', raw: 'Require #2'},
+	]);
+	t.deepEqual(m('waffle')('requires #1, REQUIRE #2').requires, [
+		{issue: '1', action: 'Requires', slug: undefined, prefix: '#', raw: 'requires #1'},
+		{issue: '2', action: 'Require', slug: undefined, prefix: '#', raw: 'REQUIRE #2'},
+	]);
+});
+
+test('Parse parentOf', t => {
+	t.deepEqual(m('waffle')('Parent of #1, Parent to #2').parentOf, [
+		{issue: '1', action: 'Parent of', slug: undefined, prefix: '#', raw: 'Parent of #1'},
+		{issue: '2', action: 'Parent to', slug: undefined, prefix: '#', raw: 'Parent to #2'},
+	]);
+	t.deepEqual(m('waffle')('Parent of #1,Parent to #2').parentOf, [
+		{issue: '1', action: 'Parent of', slug: undefined, prefix: '#', raw: 'Parent of #1'},
+		{issue: '2', action: 'Parent to', slug: undefined, prefix: '#', raw: 'Parent to #2'},
+	]);
+	t.deepEqual(m('waffle')('parent of #1, PARENT TO #2').parentOf, [
+		{issue: '1', action: 'Parent of', slug: undefined, prefix: '#', raw: 'parent of #1'},
+		{issue: '2', action: 'Parent to', slug: undefined, prefix: '#', raw: 'PARENT TO #2'},
+	]);
+});
+
+test('Parse childOf', t => {
+	t.deepEqual(m('waffle')('Child of #1, Child to #2').childOf, [
+		{issue: '1', action: 'Child of', slug: undefined, prefix: '#', raw: 'Child of #1'},
+		{issue: '2', action: 'Child to', slug: undefined, prefix: '#', raw: 'Child to #2'},
+	]);
+	t.deepEqual(m('waffle')('Child of #1,Child to #2').childOf, [
+		{issue: '1', action: 'Child of', slug: undefined, prefix: '#', raw: 'Child of #1'},
+		{issue: '2', action: 'Child to', slug: undefined, prefix: '#', raw: 'Child to #2'},
+	]);
+	t.deepEqual(m('waffle')('child of #1, CHILD TO #2').childOf, [
+		{issue: '1', action: 'Child of', slug: undefined, prefix: '#', raw: 'child of #1'},
+		{issue: '2', action: 'Child to', slug: undefined, prefix: '#', raw: 'CHILD TO #2'},
 	]);
 });
 
@@ -276,7 +408,16 @@ Fix #2
 });
 
 test('Empty options', t => {
-	const empty = {actions: [], duplicates: [], mentions: [], refs: []};
+	const empty = {
+		actions: [],
+		blocks: [],
+		requires: [],
+		parentOf: [],
+		childOf: [],
+		duplicates: [],
+		mentions: [],
+		refs: [],
+	};
 
 	t.deepEqual(m({referenceActions: [], issuePrefixes: [], mentionsPrefixes: []})('Fix #1, @user'), empty);
 	t.deepEqual(
@@ -284,14 +425,27 @@ test('Empty options', t => {
 		{
 			refs: [],
 			actions: [{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'}],
-			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
+			blocks: [],
+			requires: [],
+			parentOf: [],
+			childOf: [],
 			duplicates: [],
+			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 		}
 	);
 });
 
 test('Empty String', t => {
-	const empty = {actions: [], duplicates: [], mentions: [], refs: []};
+	const empty = {
+		actions: [],
+		blocks: [],
+		requires: [],
+		parentOf: [],
+		childOf: [],
+		duplicates: [],
+		mentions: [],
+		refs: [],
+	};
 
 	t.deepEqual(m()('   '), empty);
 	t.deepEqual(m()(''), empty);

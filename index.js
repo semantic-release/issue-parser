@@ -42,12 +42,22 @@ function buildMentionsRegexp({mentionsPrefixes}) {
 	return `((?:(?:[^\\w\\n\\v\\r]|^)+(?:${join(mentionsPrefixes)})[\\w-\\.]+[^\\W])+)`;
 }
 
-function buildRefRegexp({referenceActions, duplicateActions, issuePrefixes, issueURLSegments, hosts}) {
-	return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join([].concat(referenceActions, duplicateActions))}))?(?:${['[^\\w\\n\\v\\r]|^']
-		.concat(join(issuePrefixes.concat(issueURLSegments)))
-		.join('|')})+${hosts.length > 0 ? `(?:${join(hosts)})?` : ''}((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join(
-		issuePrefixes.concat(issueURLSegments)
-	)})(\\d+)(?!\\w)`;
+function buildRefRegexp({
+	referenceActions,
+	blocksActions,
+	requiresActions,
+	parentOfActions,
+	childOfActions,
+	duplicateActions,
+	issuePrefixes,
+	issueURLSegments,
+	hosts,
+}) {
+	return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join(
+		[].concat(referenceActions, blocksActions, requiresActions, parentOfActions, childOfActions, duplicateActions)
+	)}))?(?:${['[^\\w\\n\\v\\r]|^'].concat(join(issuePrefixes.concat(issueURLSegments))).join('|')})+${
+		hosts.length > 0 ? `(?:${join(hosts)})?` : ''
+	}((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join(issuePrefixes.concat(issueURLSegments))})(\\d+)(?!\\w)`;
 }
 
 function buildRegexp(opts) {
@@ -63,9 +73,32 @@ function buildMentionRegexp({mentionsPrefixes}) {
 	return new RegExp(`(${join(mentionsPrefixes)})([\\w-.]+)`, 'gim');
 }
 
-function parse(text, regexp, mentionRegexp, {issuePrefixes, hosts, referenceActions, duplicateActions}) {
+function parse(
+	text,
+	regexp,
+	mentionRegexp,
+	{
+		issuePrefixes,
+		hosts,
+		referenceActions,
+		blocksActions,
+		requiresActions,
+		parentOfActions,
+		childOfActions,
+		duplicateActions,
+	}
+) {
 	let parsed;
-	const results = {actions: [], refs: [], duplicates: [], mentions: []};
+	const results = {
+		actions: [],
+		blocks: [],
+		requires: [],
+		parentOf: [],
+		childOf: [],
+		duplicates: [],
+		refs: [],
+		mentions: [],
+	};
 	let noCodeBlock = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
 
 	while (regexp.test(noCodeBlock)) {
@@ -87,6 +120,14 @@ function parse(text, regexp, mentionRegexp, {issuePrefixes, hosts, referenceActi
 
 		if (includesIgnoreCase(referenceActions, action)) {
 			results.actions.push({raw, action, slug, prefix, issue});
+		} else if (includesIgnoreCase(blocksActions, action)) {
+			results.blocks.push({raw, action, slug, prefix, issue});
+		} else if (includesIgnoreCase(requiresActions, action)) {
+			results.requires.push({raw, action, slug, prefix, issue});
+		} else if (includesIgnoreCase(parentOfActions, action)) {
+			results.parentOf.push({raw, action, slug, prefix, issue});
+		} else if (includesIgnoreCase(childOfActions, action)) {
+			results.childOf.push({raw, action, slug, prefix, issue});
 		} else if (includesIgnoreCase(duplicateActions, action)) {
 			results.duplicates.push({raw, action, slug, prefix, issue});
 		} else if (issue) {
@@ -150,7 +191,7 @@ module.exports = (options = 'default', overrides = {}) => {
 
 		Reflect.defineProperty(results, 'allRefs', {
 			get() {
-				return this.actions.concat(this.refs, this.duplicates);
+				return this.actions.concat(this.refs, this.duplicates, this.blocks, this.requires, this.parentOf, this.childOf);
 			},
 		});
 		return results;

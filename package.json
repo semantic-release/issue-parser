@@ -1,6 +1,6 @@
 {
   "name": "issue-parser",
-  "description": "Parser for Github, GitLab and Bitbucket issues actions, references and mentions",
+  "description": "Parser for Github, GitLab, Bitbucket and Waffle issues actions, references and mentions",
   "version": "0.0.0-development",
   "author": "Pierre Vanduynslager (https://github.com/pvdlg)",
   "bugs": {
@@ -40,7 +40,8 @@
     "pr",
     "pull-request",
     "references",
-    "resolve"
+    "resolve",
+    "waffle"
   ],
   "license": "MIT",
   "main": "index.js",
