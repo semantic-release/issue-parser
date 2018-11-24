@@ -214,6 +214,15 @@ FIX #1
 {actions: {close: [{raw: 'FIX #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}]}}
 ```
 
+### Support delimiters between action keyword and issue
+
+```text
+Fix: #1
+```
+```js
+{actions: {close: [{raw: 'Fix: #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}]}}
+```
+
 ### Ignore references in back-tick quotes
 
 ```text
@@ -341,6 +350,13 @@ Default:
 Object with type of action as key and array of keywords as value.
 
 Each keyword match will be placed in the corresponding property of the [`result`](#result) `action` object. For example the with the configuration `{actions: fix: ['fixed', 'fixing']}` each action matching `fixed` or  `fixing` will be under `result.actions.fix`.
+
+##### delimiters
+
+Type: `Array<String>` `String`<br>
+Default: `[':']`
+
+List of delimiter characters allowed between an action keywords and the issue reference. The characters space (` `) and tab (`  `) are always allowed.
 
 ##### mentionsPrefixes
 
