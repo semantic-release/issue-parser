@@ -45,14 +45,12 @@ function buildMentionsRegexp({mentionsPrefixes}) {
 	return `((?:(?:[^\\w\\n\\v\\r]|^)+(?:${join(mentionsPrefixes)})[\\w-\\.]+[^\\W])+)`;
 }
 
-function buildRefRegexp({actions, issuePrefixes, issueURLSegments, hosts}) {
-	return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join([].concat(...Object.keys(actions).map(key => actions[key])))}))?(?:${[
-		'[^\\w\\n\\v\\r]|^',
-		join([...issuePrefixes, ...issueURLSegments]),
-	].join('|')})+${hosts.length > 0 ? `(?:${join(hosts)})?` : ''}((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join([
-		...issuePrefixes,
-		...issueURLSegments,
-	])})(\\d+)(?!\\w)`;
+function buildRefRegexp({actions, delimiters, issuePrefixes, issueURLSegments, hosts}) {
+	return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join(
+		[].concat(...Object.keys(actions).map(key => actions[key]))
+	)}))?(?:[^\\w\\n\\v\\r]|^|(?: |\\t)*(?:${join([' ', '\t', ...delimiters])})(?: |\\t)*)${
+		hosts.length > 0 ? `(?:${join(hosts)})?` : ''
+	}((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join([...issuePrefixes, ...issueURLSegments])})(\\d+)(?!\\w)`;
 }
 
 function buildRegexp(opts) {
@@ -65,7 +63,7 @@ function buildRegexp(opts) {
 }
 
 function buildMentionRegexp({mentionsPrefixes}) {
-	return new RegExp(`(${join(mentionsPrefixes)})([\\w-.]+)`, 'gim');
+	return new RegExp(`(${join(mentionsPrefixes)})([\\w-\\.]+)`, 'gim');
 }
 
 function parse(text, regexp, mentionRegexp, {actions, issuePrefixes, hosts}) {

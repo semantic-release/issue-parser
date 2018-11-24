@@ -4,7 +4,7 @@ import m from '..';
 test('Parse GitHub issue', t => {
 	t.deepEqual(
 		m('GitHub')(
-			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 fix https://github.com/o/r/issues/7 https://github.com/o/r/issues/8 fix https://github.com/o/r/pull/9 https://github.com/o/r/pull/10 fixing #11 Duplicate OF #12 @user'
+			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 fix https://github.com/o/r/issues/7 https://github.com/o/r/issues/8 fix https://github.com/o/r/pull/9 https://github.com/o/r/pull/10 fixing #11 Duplicate OF #12 Fix:#13 Fix: #14 Fix::#15 @user'
 		),
 		{
 			actions: {
@@ -15,6 +15,8 @@ test('Parse GitHub issue', t => {
 					{raw: 'fix o/r#4', action: 'Fix', slug: 'o/r', prefix: '#', issue: '4'},
 					{raw: 'fix https://github.com/o/r/issues/7', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '7'},
 					{raw: 'fix https://github.com/o/r/pull/9', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '9'},
+					{raw: 'Fix:#13', action: 'Fix', slug: undefined, prefix: '#', issue: '13'},
+					{raw: 'Fix: #14', action: 'Fix', slug: undefined, prefix: '#', issue: '14'},
 				],
 				duplicate: [{raw: 'Duplicate OF #12', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '12'}],
 			},
@@ -24,6 +26,7 @@ test('Parse GitHub issue', t => {
 				{raw: 'https://github.com/o/r/issues/8', slug: 'o/r', prefix: undefined, issue: '8'},
 				{raw: 'https://github.com/o/r/pull/10', slug: 'o/r', prefix: undefined, issue: '10'},
 				{raw: '#11', slug: undefined, prefix: '#', issue: '11'},
+				{raw: '#15', slug: undefined, prefix: '#', issue: '15'},
 			],
 			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
 		}
@@ -130,7 +133,7 @@ test('Parse Waffle issue', t => {
 test('Parse with default options', t => {
 	t.deepEqual(
 		m()(
-			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 implementing #7 https://github.com/o/r/issues/8 implementing https://github.com/o/r/issues/9 Duplicate OF #10 @user'
+			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 implementing #7 https://github.com/o/r/issues/8 implementing https://github.com/o/r/issues/9 Duplicate OF #10 Fix: #11 @user'
 		),
 		{
 			actions: {
@@ -147,6 +150,7 @@ test('Parse with default options', t => {
 						prefix: undefined,
 						issue: '9',
 					},
+					{raw: 'Fix: #11', action: 'Fix', slug: undefined, prefix: '#', issue: '11'},
 				],
 				block: [],
 				require: [],
@@ -167,17 +171,22 @@ test('Parse with default options', t => {
 test('Parse with custom options', t => {
 	t.deepEqual(
 		m({
-			actions: {close: ['fix'], fix: ['fix'], duplicate: undefined},
+			actions: {close: ['fix', 'close'], fix: ['fix'], duplicate: undefined},
+			delimiters: [':', '*'],
 			mentionsPrefixes: '!',
 			issuePrefixes: ['#'],
 			hosts: ['http://host1.com/', 'http://host2.com'],
 			issueURLSegments: ['bugs'],
 		})(
-			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fixed o/r#4 #5 o/r#6 fixing #7 http://host1.com/o/r/bugs/8 http://host2.com/o/r/bugs/9 Duplicate OF #10 !user @other'
+			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fixed o/r#4 #5 o/r#6 fixing #7 http://host1.com/o/r/bugs/8 http://host2.com/o/r/bugs/9 Duplicate OF #10 Close:#11 Close* #12 !user @other'
 		),
 		{
 			actions: {
-				close: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
+				close: [
+					{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'},
+					{raw: 'Close:#11', action: 'Close', slug: undefined, prefix: '#', issue: '11'},
+					{raw: 'Close* #12', action: 'Close', slug: undefined, prefix: '#', issue: '12'},
+				],
 				fix: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
 				block: [],
 				require: [],
