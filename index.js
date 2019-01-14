@@ -112,6 +112,7 @@ function parse(text, regexp, mentionRegexp, {actions, issuePrefixes, hosts}) {
 			}
 		}
 	}
+
 	return results;
 }
 
@@ -133,9 +134,11 @@ function normalize(opts, parentOpt) {
 			} else if (!Array.isArray(opts[opt])) {
 				throw typeError(parentOpt, opt);
 			}
+
 			if (opts[opt].length !== 0 && !opts[opt].every(opt => isString(opt))) {
 				throw typeError(parentOpt, opt);
 			}
+
 			opts[opt] = opts[opt].filter(Boolean);
 		}
 	}
