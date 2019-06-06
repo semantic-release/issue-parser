@@ -165,9 +165,12 @@ module.exports = (options = 'default', overrides = {}) => {
 
 	options = isString(options) ? hostConfig[options.toLowerCase()] : options;
 
-	const opts = Object.assign({}, hostConfig.default, options, overrides, {
-		actions: Object.assign({}, hostConfig.default.actions, options.actions, overrides.actions),
-	});
+	const opts = {
+		...hostConfig.default,
+		...options,
+		...overrides,
+		actions: {...hostConfig.default.actions, ...options.actions, ...overrides.actions},
+	};
 
 	normalize(opts);
 
