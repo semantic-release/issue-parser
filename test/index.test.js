@@ -89,47 +89,6 @@ test('Parse GitLab issue', t => {
 	);
 });
 
-test('Parse Waffle issue', t => {
-	t.deepEqual(
-		m('Waffle')(
-			'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 fix https://github.com/o/r/issues/7 https://github.com/o/r/issues/8 fix https://github.com/o/r/pull/9 https://github.com/o/r/pull/10 fixing #11 Duplicate OF #12 @user BloCks #13 Requires o/r#14 parent of https://github.com/o/r/issues/15 child to Gh-16'
-		),
-		{
-			actions: {
-				close: [
-					{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'},
-					{raw: 'reSOLved gh-2', action: 'Resolved', slug: undefined, prefix: 'gh-', issue: '2'},
-					{raw: 'CLOSES Gh-3', action: 'Closes', slug: undefined, prefix: 'Gh-', issue: '3'},
-					{raw: 'fix o/r#4', action: 'Fix', slug: 'o/r', prefix: '#', issue: '4'},
-					{raw: 'fix https://github.com/o/r/issues/7', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '7'},
-					{raw: 'fix https://github.com/o/r/pull/9', action: 'Fix', slug: 'o/r', prefix: undefined, issue: '9'},
-				],
-				block: [{raw: 'BloCks #13', action: 'Blocks', slug: undefined, prefix: '#', issue: '13'}],
-				require: [{raw: 'Requires o/r#14', action: 'Requires', slug: 'o/r', prefix: '#', issue: '14'}],
-				parentOf: [
-					{
-						raw: 'parent of https://github.com/o/r/issues/15',
-						action: 'Parent of',
-						slug: 'o/r',
-						prefix: undefined,
-						issue: '15',
-					},
-				],
-				childOf: [{raw: 'child to Gh-16', action: 'Child to', slug: undefined, prefix: 'Gh-', issue: '16'}],
-				duplicate: [{raw: 'Duplicate OF #12', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '12'}],
-			},
-			refs: [
-				{raw: '#5', slug: undefined, prefix: '#', issue: '5'},
-				{raw: 'o/r#6', slug: 'o/r', prefix: '#', issue: '6'},
-				{raw: 'https://github.com/o/r/issues/8', slug: 'o/r', prefix: undefined, issue: '8'},
-				{raw: 'https://github.com/o/r/pull/10', slug: 'o/r', prefix: undefined, issue: '10'},
-				{raw: '#11', slug: undefined, prefix: '#', issue: '11'},
-			],
-			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
-		}
-	);
-});
-
 test('Parse with default options', t => {
 	t.deepEqual(
 		m()(
@@ -152,10 +111,6 @@ test('Parse with default options', t => {
 					},
 					{raw: 'Fix: #11', action: 'Fix', slug: undefined, prefix: '#', issue: '11'},
 				],
-				block: [],
-				require: [],
-				parentOf: [],
-				childOf: [],
 				duplicate: [{raw: 'Duplicate OF #10', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '10'}],
 			},
 			refs: [
@@ -188,10 +143,6 @@ test('Parse with custom options', t => {
 					{raw: 'Close* #12', action: 'Close', slug: undefined, prefix: '#', issue: '12'},
 				],
 				fix: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
-				block: [],
-				require: [],
-				parentOf: [],
-				childOf: [],
 			},
 			refs: [
 				{raw: 'o/r#4', slug: 'o/r', prefix: '#', issue: '4'},
@@ -221,10 +172,6 @@ test('Parse with options overrides', t => {
 		{
 			actions: {
 				close: [{raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'}],
-				block: [],
-				require: [],
-				parentOf: [],
-				childOf: [],
 			},
 			refs: [
 				{raw: 'o/r#4', slug: 'o/r', prefix: '#', issue: '4'},
@@ -280,66 +227,6 @@ test('Parse actions.close', t => {
 	t.deepEqual(m('github')('fix #1, CLOSE #2').actions.close, [
 		{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'fix #1'},
 		{issue: '2', action: 'Close', slug: undefined, prefix: '#', raw: 'CLOSE #2'},
-	]);
-});
-
-test('Parse actions.block', t => {
-	t.deepEqual(m('waffle')('Blocks #1, Block #2').actions.block, [
-		{issue: '1', action: 'Blocks', slug: undefined, prefix: '#', raw: 'Blocks #1'},
-		{issue: '2', action: 'Block', slug: undefined, prefix: '#', raw: 'Block #2'},
-	]);
-	t.deepEqual(m('waffle')('Blocks #1,Block #2').actions.block, [
-		{issue: '1', action: 'Blocks', slug: undefined, prefix: '#', raw: 'Blocks #1'},
-		{issue: '2', action: 'Block', slug: undefined, prefix: '#', raw: 'Block #2'},
-	]);
-	t.deepEqual(m('waffle')('blocks #1, BLOCK #2').actions.block, [
-		{issue: '1', action: 'Blocks', slug: undefined, prefix: '#', raw: 'blocks #1'},
-		{issue: '2', action: 'Block', slug: undefined, prefix: '#', raw: 'BLOCK #2'},
-	]);
-});
-
-test('Parse actions.require', t => {
-	t.deepEqual(m('waffle')('Requires #1, Require #2').actions.require, [
-		{issue: '1', action: 'Requires', slug: undefined, prefix: '#', raw: 'Requires #1'},
-		{issue: '2', action: 'Require', slug: undefined, prefix: '#', raw: 'Require #2'},
-	]);
-	t.deepEqual(m('waffle')('Requires #1,Require #2').actions.require, [
-		{issue: '1', action: 'Requires', slug: undefined, prefix: '#', raw: 'Requires #1'},
-		{issue: '2', action: 'Require', slug: undefined, prefix: '#', raw: 'Require #2'},
-	]);
-	t.deepEqual(m('waffle')('requires #1, REQUIRE #2').actions.require, [
-		{issue: '1', action: 'Requires', slug: undefined, prefix: '#', raw: 'requires #1'},
-		{issue: '2', action: 'Require', slug: undefined, prefix: '#', raw: 'REQUIRE #2'},
-	]);
-});
-
-test('Parse actions.parentOf', t => {
-	t.deepEqual(m('waffle')('Parent of #1, Parent to #2').actions.parentOf, [
-		{issue: '1', action: 'Parent of', slug: undefined, prefix: '#', raw: 'Parent of #1'},
-		{issue: '2', action: 'Parent to', slug: undefined, prefix: '#', raw: 'Parent to #2'},
-	]);
-	t.deepEqual(m('waffle')('Parent of #1,Parent to #2').actions.parentOf, [
-		{issue: '1', action: 'Parent of', slug: undefined, prefix: '#', raw: 'Parent of #1'},
-		{issue: '2', action: 'Parent to', slug: undefined, prefix: '#', raw: 'Parent to #2'},
-	]);
-	t.deepEqual(m('waffle')('parent of #1, PARENT TO #2').actions.parentOf, [
-		{issue: '1', action: 'Parent of', slug: undefined, prefix: '#', raw: 'parent of #1'},
-		{issue: '2', action: 'Parent to', slug: undefined, prefix: '#', raw: 'PARENT TO #2'},
-	]);
-});
-
-test('Parse actions.childOf', t => {
-	t.deepEqual(m('waffle')('Child of #1, Child to #2').actions.childOf, [
-		{issue: '1', action: 'Child of', slug: undefined, prefix: '#', raw: 'Child of #1'},
-		{issue: '2', action: 'Child to', slug: undefined, prefix: '#', raw: 'Child to #2'},
-	]);
-	t.deepEqual(m('waffle')('Child of #1,Child to #2').actions.childOf, [
-		{issue: '1', action: 'Child of', slug: undefined, prefix: '#', raw: 'Child of #1'},
-		{issue: '2', action: 'Child to', slug: undefined, prefix: '#', raw: 'Child to #2'},
-	]);
-	t.deepEqual(m('waffle')('child of #1, CHILD TO #2').actions.childOf, [
-		{issue: '1', action: 'Child of', slug: undefined, prefix: '#', raw: 'child of #1'},
-		{issue: '2', action: 'Child to', slug: undefined, prefix: '#', raw: 'CHILD TO #2'},
 	]);
 });
 
@@ -413,7 +300,7 @@ Fix #2
 
 test('Empty options', t => {
 	t.deepEqual(m({actions: {close: []}, issuePrefixes: [], mentionsPrefixes: []})('Fix #1, @user'), {
-		actions: {block: [], require: [], parentOf: [], childOf: [], duplicate: []},
+		actions: {duplicate: []},
 		mentions: [],
 		refs: [],
 	});
@@ -423,10 +310,6 @@ test('Empty options', t => {
 			refs: [],
 			actions: {
 				close: [{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'}],
-				block: [],
-				require: [],
-				parentOf: [],
-				childOf: [],
 				duplicate: [],
 			},
 			mentions: [{raw: '@user', prefix: '@', user: 'user'}],
@@ -436,7 +319,7 @@ test('Empty options', t => {
 
 test('Empty String', t => {
 	const empty = {
-		actions: {close: [], block: [], require: [], parentOf: [], childOf: [], duplicate: []},
+		actions: {close: [], duplicate: []},
 		mentions: [],
 		refs: [],
 	};
@@ -448,7 +331,7 @@ test('Empty String', t => {
 test('Throw TypeError for invalid options', t => {
 	t.throws(
 		() => m('missing-option'),
-		"The supported configuration are [github, bitbucket, gitlab, waffle, default], got 'missing-option'"
+		"The supported configuration are [github, bitbucket, gitlab, default], got 'missing-option'"
 	);
 	t.throws(() => m([]), 'The options argument must be a String or an Object');
 	t.throws(() => m(1), 'The options argument must be a String or an Object');
