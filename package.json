@@ -3,6 +3,11 @@
   "description": "Parser for Github, GitLab and Bitbucket issues actions, references and mentions",
   "version": "0.0.0-development",
   "author": "Pierre Vanduynslager (https://github.com/pvdlg)",
+  "ava": {
+    "files": [
+      "test/**/*.test.js"
+    ]
+  },
   "bugs": {
     "url": "https://github.com/pvdlg/issue-parser/issues"
   },
@@ -14,7 +19,7 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
-    "ava": "^2.0.0",
+    "ava": "^3.1.0",
     "codecov": "^3.0.0",
     "nyc": "^15.0.0",
     "semantic-release": "^17.0.0",
