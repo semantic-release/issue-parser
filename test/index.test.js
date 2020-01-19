@@ -1,5 +1,5 @@
-import test from 'ava';
-import m from '..';
+const test = require('ava');
+const m = require('..');
 
 test('Parse GitHub issue', t => {
 	t.deepEqual(
@@ -329,39 +329,55 @@ test('Empty String', t => {
 });
 
 test('Throw TypeError for invalid options', t => {
-	t.throws(
-		() => m('missing-option'),
-		"The supported configuration are [github, bitbucket, gitlab, default], got 'missing-option'"
-	);
-	t.throws(() => m([]), 'The options argument must be a String or an Object');
-	t.throws(() => m(1), 'The options argument must be a String or an Object');
-	t.throws(() => m({mentionsPrefixes: 1}), 'The mentionsPrefixes property must be a String or an array of Strings');
-	t.throws(() => m({mentionsPrefixes: [1]}), 'The mentionsPrefixes property must be a String or an array of Strings');
-	t.throws(() => m({actions: 1}), 'The options.actions property must be an Object');
-	t.throws(() => m({actions: {close: 1}}), 'The actions.close property must be a String or an array of Strings');
-	t.throws(() => m({actions: {close: [1]}}), 'The actions.close property must be a String or an array of Strings');
-	t.throws(() => m({actions: {fix: [1]}}), 'The actions.fix property must be a String or an array of Strings');
+	t.throws(() => m('missing-option'), {
+		message: "The supported configuration are [github, bitbucket, gitlab, default], got 'missing-option'",
+	});
+	t.throws(() => m([]), {message: 'The options argument must be a String or an Object'});
+	t.throws(() => m(1), {message: 'The options argument must be a String or an Object'});
+	t.throws(() => m({mentionsPrefixes: 1}), {
+		message: 'The mentionsPrefixes property must be a String or an array of Strings',
+	});
+	t.throws(() => m({mentionsPrefixes: [1]}), {
+		message: 'The mentionsPrefixes property must be a String or an array of Strings',
+	});
+	t.throws(() => m({actions: 1}), {message: 'The options.actions property must be an Object'});
+	t.throws(() => m({actions: {close: 1}}), {
+		message: 'The actions.close property must be a String or an array of Strings',
+	});
+	t.throws(() => m({actions: {close: [1]}}), {
+		message: 'The actions.close property must be a String or an array of Strings',
+	});
+	t.throws(() => m({actions: {fix: [1]}}), {
+		message: 'The actions.fix property must be a String or an array of Strings',
+	});
 });
 
 test('Throw TypeError for invalid overrides', t => {
-	t.throws(() => m({}, []), 'The overrides argument must be an Object');
-	t.throws(() => m({}, 1), 'The overrides argument must be an Object');
-	t.throws(() => m({}, ''), 'The overrides argument must be an Object');
-	t.throws(() => m({}, 'string'), 'The overrides argument must be an Object');
-	t.throws(() => m({}, {mentionsPrefixes: 1}), 'The mentionsPrefixes property must be a String or an array of Strings');
-	t.throws(
-		() => m({}, {mentionsPrefixes: [1]}),
-		'The mentionsPrefixes property must be a String or an array of Strings'
-	);
-	t.throws(() => m({}, {actions: 1}), 'The overrides.actions property must be an Object');
-	t.throws(() => m({}, {actions: {close: 1}}), 'The actions.close property must be a String or an array of Strings');
-	t.throws(() => m({}, {actions: {close: [1]}}), 'The actions.close property must be a String or an array of Strings');
-	t.throws(() => m({}, {actions: {fix: [1]}}), 'The actions.fix property must be a String or an array of Strings');
+	t.throws(() => m({}, []), {message: 'The overrides argument must be an Object'});
+	t.throws(() => m({}, 1), {message: 'The overrides argument must be an Object'});
+	t.throws(() => m({}, ''), {message: 'The overrides argument must be an Object'});
+	t.throws(() => m({}, 'string'), {message: 'The overrides argument must be an Object'});
+	t.throws(() => m({}, {mentionsPrefixes: 1}), {
+		message: 'The mentionsPrefixes property must be a String or an array of Strings',
+	});
+	t.throws(() => m({}, {mentionsPrefixes: [1]}), {
+		message: 'The mentionsPrefixes property must be a String or an array of Strings',
+	});
+	t.throws(() => m({}, {actions: 1}), {message: 'The overrides.actions property must be an Object'});
+	t.throws(() => m({}, {actions: {close: 1}}), {
+		message: 'The actions.close property must be a String or an array of Strings',
+	});
+	t.throws(() => m({}, {actions: {close: [1]}}), {
+		message: 'The actions.close property must be a String or an array of Strings',
+	});
+	t.throws(() => m({}, {actions: {fix: [1]}}), {
+		message: 'The actions.fix property must be a String or an array of Strings',
+	});
 });
 
 test('Throw TypeError for invalid input', t => {
-	t.throws(() => m()(), 'The issue text must be a String');
-	t.throws(() => m()(1), 'The issue text must be a String');
-	t.throws(() => m()({}), 'The issue text must be a String');
-	t.throws(() => m()([]), 'The issue text must be a String');
+	t.throws(() => m()(), {message: 'The issue text must be a String'});
+	t.throws(() => m()(1), {message: 'The issue text must be a String'});
+	t.throws(() => m()({}), {message: 'The issue text must be a String'});
+	t.throws(() => m()([]), {message: 'The issue text must be a String'});
 });
