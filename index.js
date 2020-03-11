@@ -10,13 +10,13 @@ const {hasOwnProperty} = Object.prototype;
 /* eslint prefer-named-capture-group: "off" */
 
 const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
-const CODE_BLOCK_REGEXP = /(`(?![\\]))((?:.(?!\1(?![\\])))*.?)\1/g;
+const CODE_BLOCK_REGEXP = /(`(?!\\))((?:.(?!\1(?!\\)))*.?)\1/g;
 const HTML_CODE_BLOCK_REGEXP = /(<code)+?((?!(<code|<\/code>)+?)[\S\s])*(<\/code>)+?/gim;
 const LEADING_TRAILING_SLASH_REGEXP = /^\/?([^/]+(?:\/[^/]+)*)\/?$/;
 const TRAILING_SLASH_REGEXP = /\/?$/;
 
-function inverse(str) {
-	return str
+function inverse(string) {
+	return string
 		.split('')
 		.reverse()
 		.join('');
@@ -37,8 +37,8 @@ function addTrailingSlash(value) {
 	return value.replace(TRAILING_SLASH_REGEXP, '/');
 }
 
-function includesIgnoreCase(arr, value) {
-	return arr.findIndex(val => val.toUpperCase() === value.toUpperCase()) > -1;
+function includesIgnoreCase(array, value) {
+	return array.findIndex(arrayValue => arrayValue.toUpperCase() === value.toUpperCase()) > -1;
 }
 
 function buildMentionsRegexp({mentionsPrefixes}) {
@@ -53,11 +53,11 @@ function buildRefRegexp({actions, delimiters, issuePrefixes, issueURLSegments, h
 	}((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join([...issuePrefixes, ...issueURLSegments])})(\\d+)(?!\\w)`;
 }
 
-function buildRegexp(opts) {
+function buildRegexp(options) {
 	return new RegExp(
-		opts.mentionsPrefixes.length > 0
-			? `(?:${buildRefRegexp(opts)}|${buildMentionsRegexp(opts)})`
-			: buildMentionsRegexp(opts),
+		options.mentionsPrefixes.length > 0
+			? `(?:${buildRefRegexp(options)}|${buildMentionsRegexp(options)})`
+			: buildMentionsRegexp(options),
 		'gim'
 	);
 }
@@ -122,24 +122,24 @@ function typeError(parentOpt, opt) {
 	);
 }
 
-function normalize(opts, parentOpt) {
-	for (const opt of Object.keys(opts)) {
+function normalize(options, parentOpt) {
+	for (const opt of Object.keys(options)) {
 		if (!parentOpt && opt === 'actions') {
-			normalize(opts[opt], opt);
+			normalize(options[opt], opt);
 		} else {
-			if (!opts[opt]) {
-				opts[opt] = [];
-			} else if (isString(opts[opt])) {
-				opts[opt] = [opts[opt]];
-			} else if (!Array.isArray(opts[opt])) {
+			if (!options[opt]) {
+				options[opt] = [];
+			} else if (isString(options[opt])) {
+				options[opt] = [options[opt]];
+			} else if (!Array.isArray(options[opt])) {
 				throw typeError(parentOpt, opt);
 			}
 
-			if (opts[opt].length !== 0 && !opts[opt].every(opt => isString(opt))) {
+			if (options[opt].length !== 0 && !options[opt].every(opt => isString(opt))) {
 				throw typeError(parentOpt, opt);
 			}
 
-			opts[opt] = opts[opt].filter(Boolean);
+			options[opt] = options[opt].filter(Boolean);
 		}
 	}
 }
@@ -165,27 +165,27 @@ module.exports = (options = 'default', overrides = {}) => {
 
 	options = isString(options) ? hostConfig[options.toLowerCase()] : options;
 
-	const opts = {
+	const mergedOptions = {
 		...hostConfig.default,
 		...options,
 		...overrides,
 		actions: {...hostConfig.default.actions, ...options.actions, ...overrides.actions},
 	};
 
-	normalize(opts);
+	normalize(mergedOptions);
 
-	opts.hosts = opts.hosts.map(addTrailingSlash);
-	opts.issueURLSegments = opts.issueURLSegments.map(addLeadingAndTrailingSlash);
+	mergedOptions.hosts = mergedOptions.hosts.map(addTrailingSlash);
+	mergedOptions.issueURLSegments = mergedOptions.issueURLSegments.map(addLeadingAndTrailingSlash);
 
-	const regexp = buildRegexp(opts);
-	const mentionRegexp = buildMentionRegexp(opts);
+	const regexp = buildRegexp(mergedOptions);
+	const mentionRegexp = buildMentionRegexp(mergedOptions);
 
 	return text => {
 		if (!isString(text)) {
 			throw new TypeError('The issue text must be a String');
 		}
 
-		const results = parse(text, regexp, mentionRegexp, opts);
+		const results = parse(text, regexp, mentionRegexp, mergedOptions);
 
 		Reflect.defineProperty(results, 'allRefs', {
 			get() {
