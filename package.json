@@ -81,6 +81,7 @@
   },
   "xo": {
     "prettier": true,
+    "space": true,
     "rules": {
       "unicorn/string-content": "off"
     }
