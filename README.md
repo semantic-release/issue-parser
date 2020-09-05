@@ -4,7 +4,6 @@ Parser for [Github](https://github.com), [GitLab](https://gitlab.com) and [Bitbu
 
 [![Travis](https://img.shields.io/travis/pvdlg/issue-parser.svg)](https://travis-ci.org/pvdlg/issue-parser)
 [![Codecov](https://img.shields.io/codecov/c/github/pvdlg/issue-parser.svg)](https://codecov.io/gh/pvdlg/issue-parser)
-[![Greenkeeper badge](https://badges.greenkeeper.io/pvdlg/issue-parser.svg)](https://greenkeeper.io)
 
 The parser can identify:
 - GitHub [closing keywords](https://help.github.com/articles/closing-issues-using-keywords), [duplicate keyword](https://help.github.com/articles/about-duplicate-issues-and-pull-requests), [issue references](https://guides.github.com/features/issues/#notifications) and [user mentions](https://guides.github.com/features/issues/#notifications)
