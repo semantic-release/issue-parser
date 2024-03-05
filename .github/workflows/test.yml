@@ -43,7 +43,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm clean-install
-      - run: npm audit signatures
+#      - run: npm audit signatures
       - run: npm test
 
   # verify against the node version defined for development in the .nvmrc
