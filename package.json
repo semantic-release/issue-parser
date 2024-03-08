@@ -79,6 +79,11 @@
     "test:unit": "nyc ava -v",
     "lint:js": "xo"
   },
+  "renovate": {
+    "extends": [
+      "github>semantic-release/.github:renovate-config"
+    ]
+  },
   "xo": {
     "prettier": true,
     "space": true,
