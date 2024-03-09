@@ -47,7 +47,7 @@ function buildMentionsRegexp({mentionsPrefixes}) {
 
 function buildRefRegexp({actions, delimiters, issuePrefixes, issueURLSegments, hosts}) {
   return `(?:(?:[^\\w\\n\\v\\r]|^)+(${join(
-    [].concat(...Object.keys(actions).map(key => actions[key]))
+    Object.keys(actions).flatMap(key => actions[key])
   )}))?(?:[^\\w\\n\\v\\r]|^|(?: |\\t)*(?:${join([' ', '\t', ...delimiters])})(?: |\\t)*)${
     hosts.length > 0 ? `(?:${join(hosts)})?` : ''
   }((?:(?:[\\w-\\.]+)\\/)+(?:[\\w-\\.]+))?(${join([...issuePrefixes, ...issueURLSegments])})(\\d+)(?!\\w)`;
