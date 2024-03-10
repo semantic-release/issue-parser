@@ -23,7 +23,7 @@
     "codecov": "^3.0.0",
     "lockfile-lint": "4.13.2",
     "ls-engines": "0.9.1",
-    "npm-run-all2": "5.0.2",
+    "npm-run-all2": "6.1.2",
     "nyc": "^15.0.0",
     "publint": "0.2.7",
     "xo": "^0.28.0"
