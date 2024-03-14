@@ -2,11 +2,9 @@
 
 Parser for [Github](https://github.com), [GitLab](https://gitlab.com) and [Bitbucket](https://bitbucket.org) issues actions, references and mentions
 
-<!--status-badges start -->
-
-[![Node CI Workflow Status][github-actions-ci-badge]][github-actions-ci-link]
-
-<!--status-badges end -->
+[![Travis](https://img.shields.io/travis/pvdlg/issue-parser.svg)](https://travis-ci.org/pvdlg/issue-parser)
+[![Codecov](https://img.shields.io/codecov/c/github/pvdlg/issue-parser.svg)](https://codecov.io/gh/pvdlg/issue-parser)
+[![Greenkeeper badge](https://badges.greenkeeper.io/pvdlg/issue-parser.svg)](https://greenkeeper.io)
 
 The parser can identify:
 - GitHub [closing keywords](https://help.github.com/articles/closing-issues-using-keywords), [duplicate keyword](https://help.github.com/articles/about-duplicate-issues-and-pull-requests), [issue references](https://guides.github.com/features/issues/#notifications) and [user mentions](https://guides.github.com/features/issues/#notifications)
@@ -440,8 +438,3 @@ Each reference has the following properties:
 | slug   | `String` | The repository owner and name, for issue referred as `<owner>/<repo>#<issue number>`.                |
 | prefix | `String` | The prefix used to identify the issue.                                                               |
 | issue  | `String` | The issue number.                                                                                    |
-
-
-[github-actions-ci-link]: https://github.com/semantic-release/issue-parser/actions?query=workflow%3A%22Test%22+branch%3Amaster
-
-[github-actions-ci-badge]: https://github.com/semantic-release/issue-parser/workflows/Test/badge.svg

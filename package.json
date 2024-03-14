@@ -9,7 +9,7 @@
     ]
   },
   "bugs": {
-    "url": "https://github.com/semantic-release/issue-parser/issues"
+    "url": "https://github.com/pvdlg/issue-parser/issues"
   },
   "dependencies": {
     "lodash.capitalize": "^4.2.1",
@@ -19,23 +19,20 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
-    "ava": "6.1.2",
-    "codecov": "3.8.3",
-    "lockfile-lint": "4.13.2",
-    "ls-engines": "0.9.1",
-    "npm-run-all2": "6.1.2",
-    "nyc": "15.1.0",
-    "publint": "0.2.7",
-    "xo": "0.28.3"
+    "ava": "^3.1.0",
+    "codecov": "^3.0.0",
+    "nyc": "^15.0.0",
+    "semantic-release": "^17.0.0",
+    "xo": "^0.28.0"
   },
   "engines": {
-    "node": "^18.17 || >=20.6.1"
+    "node": ">=10.13"
   },
   "files": [
     "lib",
     "index.js"
   ],
-  "homepage": "https://github.com/semantic-release/issue-parser#readme",
+  "homepage": "https://github.com/pvdlg/issue-parser#readme",
   "keywords": [
     "bitbucket",
     "close",
@@ -65,14 +62,6 @@
     ],
     "all": true
   },
-  "lockfile-lint": {
-    "path": "package-lock.json",
-    "type": "npm",
-    "validate-https": true,
-    "allowed-hosts": [
-      "npm"
-    ]
-  },
   "prettier": {
     "printWidth": 120,
     "trailingComma": "es5"
@@ -82,21 +71,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/semantic-release/issue-parser.git"
+    "url": "https://github.com/pvdlg/issue-parser.git"
   },
   "scripts": {
     "codecov": "codecov -f coverage/coverage-final.json",
-    "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
-    "test:unit": "nyc ava -v",
-    "lint:js": "xo",
-    "lint:lockfile": "lockfile-lint",
-    "lint:engines": "ls-engines",
-    "lint:publish": "publint --strict"
-  },
-  "renovate": {
-    "extends": [
-      "github>semantic-release/.github:renovate-config"
-    ]
+    "lint": "xo",
+    "semantic-release": "semantic-release",
+    "test": "xo && nyc ava -v"
   },
   "xo": {
     "prettier": true,
