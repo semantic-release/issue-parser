@@ -442,6 +442,6 @@ Each reference has the following properties:
 | issue  | `String` | The issue number.                                                                                    |
 
 
-[github-actions-ci-link]: https://github.com/semantic-release/issue-parser/actions?query=workflow%3A%22Test%22+branch%3Amaster
+[github-actions-ci-link]: https://github.com/semantic-release/issue-parser/actions/workflows/test.yml
 
-[github-actions-ci-badge]: https://github.com/semantic-release/issue-parser/workflows/Test/badge.svg
+[github-actions-ci-badge]: https://github.com/semantic-release/issue-parser/actions/workflows/test.yml/badge.svg
