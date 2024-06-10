@@ -24,7 +24,7 @@
     "lockfile-lint": "4.13.2",
     "ls-engines": "0.9.1",
     "npm-run-all2": "6.2.0",
-    "nyc": "15.1.0",
+    "nyc": "17.0.0",
     "publint": "0.2.8",
     "xo": "0.28.3"
   },
