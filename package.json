@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "ava": "6.1.3",
-    "codecov": "3.8.3",
     "lockfile-lint": "4.14.0",
     "ls-engines": "0.9.3",
     "npm-run-all2": "6.2.2",
@@ -85,7 +84,6 @@
     "url": "https://github.com/semantic-release/issue-parser.git"
   },
   "scripts": {
-    "codecov": "codecov -f coverage/coverage-final.json",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "test:unit": "nyc ava -v",
     "lint:js": "xo",
