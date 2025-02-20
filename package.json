@@ -24,7 +24,7 @@
     "ls-engines": "0.9.3",
     "npm-run-all2": "7.0.2",
     "nyc": "17.1.0",
-    "publint": "0.3.5",
+    "publint": "0.3.6",
     "xo": "0.28.3"
   },
   "engines": {
