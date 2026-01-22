@@ -11,13 +11,6 @@
   "bugs": {
     "url": "https://github.com/semantic-release/issue-parser/issues"
   },
-  "dependencies": {
-    "lodash.capitalize": "^4.2.1",
-    "lodash.escaperegexp": "^4.1.2",
-    "lodash.isplainobject": "^4.0.6",
-    "lodash.isstring": "^4.0.1",
-    "lodash.uniqby": "^4.7.0"
-  },
   "devDependencies": {
     "ava": "6.4.1",
     "lockfile-lint": "4.14.1",
@@ -27,6 +20,9 @@
     "publint": "0.3.16",
     "xo": "0.28.3"
   },
+  "contributors": [
+    "Alexander Vassbotn Røyne-Helgesen <alexander@phun-ky.net>"
+  ],
   "engines": {
     "node": "^18.17 || >=20.6.1"
   },
