@@ -19,7 +19,7 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
-    "ava": "6.4.1",
+    "ava": "7.0.0",
     "lockfile-lint": "5.0.0",
     "ls-engines": "0.9.4",
     "npm-run-all2": "8.0.4",
