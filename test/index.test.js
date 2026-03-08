@@ -298,6 +298,57 @@ Fix #2
   ]);
 });
 
+test('Exclude HTML comments', t => {
+  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3').actions.close, [
+    {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+    {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
+  ]);
+
+  t.deepEqual(m('github')('Fix #1 <!-- Fixes #2 --> #3').actions.close, [
+    {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+  ]);
+
+  t.deepEqual(m('github')('Fix #1 <!-- Fixes #2 --> #3').refs, [{issue: '3', slug: undefined, prefix: '#', raw: '#3'}]);
+
+  t.deepEqual(
+    m('github')(`Fix #1 <!--
+Fix #2
+Closes #3
+--> Fix #4`).actions.close,
+    [
+      {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+      {issue: '4', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #4'},
+    ]
+  );
+
+  t.deepEqual(m('github')('<!-- Fix #1 -->').actions.close, []);
+
+  t.deepEqual(m('github')('<!--Fix #1-->').actions.close, []);
+
+  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> Fix #5').actions.close, [
+    {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+    {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
+    {issue: '5', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #5'},
+  ]);
+
+  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> #5 <!-- Fix #6 --> #7').actions.close, [
+    {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+    {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
+  ]);
+
+  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> #5 <!-- Fix #6 --> #7').refs, [
+    {issue: '5', slug: undefined, prefix: '#', raw: '#5'},
+    {issue: '7', slug: undefined, prefix: '#', raw: '#7'},
+  ]);
+
+  t.deepEqual(m('github')('Fix #1<!-- Fix #2 -->Fix #3').actions.close, [
+    {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
+    {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
+  ]);
+
+  t.deepEqual(m('github')('<!-- @user --> @other').mentions, [{raw: '@other', prefix: '@', user: 'other'}]);
+});
+
 test('Empty options', t => {
   t.deepEqual(m({actions: {close: []}, issuePrefixes: [], mentionsPrefixes: []})('Fix #1, @user'), {
     actions: {duplicate: []},
