@@ -12,6 +12,7 @@ const {hasOwnProperty} = Object.prototype;
 const FENCE_BLOCK_REGEXP = /^(([ \t]*`{3,4})([^\n]*)([\s\S]+?)(^[ \t]*\2))/gm;
 const CODE_BLOCK_REGEXP = /(`(?!\\))((?:.(?!\1(?!\\)))*.?)\1/g;
 const HTML_CODE_BLOCK_REGEXP = /(<code)+?((?!(<code|<\/code>)+?)[\S\s])*(<\/code>)+?/gim;
+const HTML_COMMENT_REGEXP = /<!--[\s\S]*?-->/g;
 const LEADING_TRAILING_SLASH_REGEXP = /^\/?([^/]+(?:\/[^/]+)*)\/?$/;
 const TRAILING_SLASH_REGEXP = /\/?$/;
 
@@ -76,13 +77,15 @@ function parse(text, regexp, mentionRegexp, {actions, issuePrefixes, hosts}) {
     refs: [],
     mentions: [],
   };
-  let noCodeBlock = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
+  let filteredText = inverse(inverse(text.replace(FENCE_BLOCK_REGEXP, '')).replace(CODE_BLOCK_REGEXP, ''));
 
-  while (regexp.test(noCodeBlock)) {
-    noCodeBlock = noCodeBlock.replace(HTML_CODE_BLOCK_REGEXP, '');
+  while (regexp.test(filteredText)) {
+    filteredText = filteredText.replace(HTML_CODE_BLOCK_REGEXP, '');
   }
 
-  while ((parsed = regexp.exec(noCodeBlock)) !== null) {
+  filteredText = filteredText.replace(HTML_COMMENT_REGEXP, ' ');
+
+  while ((parsed = regexp.exec(filteredText)) !== null) {
     let [raw, action, slug, prefix, issue, mentions] = parsed;
     prefix =
       prefix && issuePrefixes.some(issuePrefix => issuePrefix.toUpperCase() === prefix.toUpperCase())
