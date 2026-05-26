@@ -22,7 +22,7 @@
     "ava": "6.4.1",
     "lockfile-lint": "5.0.0",
     "ls-engines": "0.9.4",
-    "npm-run-all2": "9.0.0",
+    "npm-run-all2": "9.0.1",
     "nyc": "18.0.0",
     "publint": "0.3.21",
     "xo": "0.28.3"
