@@ -1,9 +1,9 @@
-const escapeRegExp = require('lodash.escaperegexp');
-const capitalize = require('lodash.capitalize');
-const isString = require('lodash.isstring');
-const isPlainObject = require('lodash.isplainobject');
-const uniqBy = require('lodash.uniqby');
-const hostConfig = require('./lib/hosts-config');
+import escapeRegExp from 'lodash.escaperegexp';
+import capitalize from 'lodash.capitalize';
+import isString from 'lodash.isstring';
+import isPlainObject from 'lodash.isplainobject';
+import uniqBy from 'lodash.uniqby';
+import hostConfig from './lib/hosts-config.js';
 
 const {hasOwnProperty} = Object.prototype;
 
@@ -147,7 +147,7 @@ function normalize(options, parentOpt) {
   }
 }
 
-module.exports = (options = 'default', overrides = {}) => {
+export default (options = 'default', overrides = {}) => {
   if (!isString(options) && !isPlainObject(options)) {
     throw new TypeError('The options argument must be a String or an Object');
   }

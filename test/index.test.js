@@ -1,9 +1,9 @@
-const test = require('ava');
-const m = require('..');
+import test from 'ava';
+import issueParser from '../index.js';
 
 test('Parse GitHub issue', t => {
   t.deepEqual(
-    m('GitHub')(
+    issueParser('GitHub')(
       'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 fix https://github.com/o/r/issues/7 https://github.com/o/r/issues/8 fix https://github.com/o/r/pull/9 https://github.com/o/r/pull/10 fixing #11 Duplicate OF #12 Fix:#13 Fix: #14 Fix::#15 @user'
     ),
     {
@@ -34,7 +34,7 @@ test('Parse GitHub issue', t => {
 });
 
 test('Parse Bitbucket issue', t => {
-  t.deepEqual(m('Bitbucket')('Fix #1 reSOLved #2 CLOSES #3 fix o/r#4 #5 o/r#6 fixing #7 /duplicate #8 @user'), {
+  t.deepEqual(issueParser('Bitbucket')('Fix #1 reSOLved #2 CLOSES #3 fix o/r#4 #5 o/r#6 fixing #7 /duplicate #8 @user'), {
     actions: {
       close: [
         {raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'},
@@ -55,7 +55,7 @@ test('Parse Bitbucket issue', t => {
 
 test('Parse GitLab issue', t => {
   t.deepEqual(
-    m('GitLab')(
+    issueParser('GitLab')(
       'Fix #1 reSOLved #2 IMPLEMENT #3 fix g/sg/o/r#4 #5 o/r#6 fix https://gitlab.com/o/r/issues/7 https://gitlab.com/o/r/issues/8 fix https://gitlab.com/o/r/merge_requests/9 https://gitlab.com/o/r/merge_requests/10 fixing #11 fixing !12 /duplicate #13 @user'
     ),
     {
@@ -91,7 +91,7 @@ test('Parse GitLab issue', t => {
 
 test('Parse with default options', t => {
   t.deepEqual(
-    m()(
+    issueParser()(
       'Fix #1 reSOLved gh-2 CLOSES Gh-3 fix o/r#4 #5 o/r#6 implementing #7 https://github.com/o/r/issues/8 implementing https://github.com/o/r/issues/9 Duplicate OF #10 Fix: #11 @user'
     ),
     {
@@ -125,7 +125,7 @@ test('Parse with default options', t => {
 
 test('Parse with custom options', t => {
   t.deepEqual(
-    m({
+    issueParser({
       actions: {close: ['fix', 'close'], fix: ['fix'], duplicate: undefined},
       delimiters: [':', '*'],
       mentionsPrefixes: '!',
@@ -160,7 +160,7 @@ test('Parse with custom options', t => {
 
 test('Parse with options overrides', t => {
   t.deepEqual(
-    m('default', {
+    issueParser('default', {
       actions: {close: ['fix'], duplicate: false},
       mentionsPrefixes: '!',
       issuePrefixes: ['#'],
@@ -188,7 +188,7 @@ test('Parse with options overrides', t => {
 });
 
 test('"allRefs" returns deduped refs and actions', t => {
-  t.deepEqual(m('github', {actions: {fix: ['fix']}})('Fix #1 #2 Duplicate of #3').allRefs, [
+  t.deepEqual(issueParser('github', {actions: {fix: ['fix']}})('Fix #1 #2 Duplicate of #3').allRefs, [
     {raw: '#2', slug: undefined, prefix: '#', issue: '2'},
     {raw: 'Fix #1', action: 'Fix', slug: undefined, prefix: '#', issue: '1'},
     {raw: 'Duplicate of #3', action: 'Duplicate of', slug: undefined, prefix: '#', issue: '3'},
@@ -198,68 +198,68 @@ test('"allRefs" returns deduped refs and actions', t => {
 test('Ignore malformed references', t => {
   const empty = {actions: {close: [], duplicate: []}, mentions: [], refs: []};
 
-  t.deepEqual(m('github')('Test#3'), empty);
-  t.deepEqual(m('github')('Fix repo#3'), empty);
-  t.deepEqual(m('github')('#3a'), empty);
-  t.deepEqual(m('github')('Fix 3'), empty);
-  t.deepEqual(m('github')('Fix #3a'), empty);
+  t.deepEqual(issueParser('github')('Test#3'), empty);
+  t.deepEqual(issueParser('github')('Fix repo#3'), empty);
+  t.deepEqual(issueParser('github')('#3a'), empty);
+  t.deepEqual(issueParser('github')('Fix 3'), empty);
+  t.deepEqual(issueParser('github')('Fix #3a'), empty);
 });
 
 test('Parse references', t => {
-  t.deepEqual(m('github')('#1,#2').refs, [
+  t.deepEqual(issueParser('github')('#1,#2').refs, [
     {issue: '1', slug: undefined, prefix: '#', raw: '#1'},
     {issue: '2', slug: undefined, prefix: '#', raw: '#2'},
   ]);
-  t.deepEqual(m('github')('test ##1').refs, [{issue: '1', slug: undefined, prefix: '#', raw: '##1'}]);
-  t.deepEqual(m('github')('#1#2').refs, [{issue: '1', slug: undefined, prefix: '#', raw: '#1'}]);
-  t.deepEqual(m('github')('Fix #1Fix #2').refs, [{issue: '2', slug: undefined, prefix: '#', raw: '#2'}]);
+  t.deepEqual(issueParser('github')('test ##1').refs, [{issue: '1', slug: undefined, prefix: '#', raw: '##1'}]);
+  t.deepEqual(issueParser('github')('#1#2').refs, [{issue: '1', slug: undefined, prefix: '#', raw: '#1'}]);
+  t.deepEqual(issueParser('github')('Fix #1Fix #2').refs, [{issue: '2', slug: undefined, prefix: '#', raw: '#2'}]);
 });
 
 test('Parse actions.close', t => {
-  t.deepEqual(m('github')('Fix #1, Fix #2').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1, Fix #2').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
     {issue: '2', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #2'},
   ]);
-  t.deepEqual(m('github')('Fix #1,Fix #2').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1,Fix #2').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
     {issue: '2', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #2'},
   ]);
-  t.deepEqual(m('github')('fix #1, CLOSE #2').actions.close, [
+  t.deepEqual(issueParser('github')('fix #1, CLOSE #2').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'fix #1'},
     {issue: '2', action: 'Close', slug: undefined, prefix: '#', raw: 'CLOSE #2'},
   ]);
 });
 
 test('Parse actions.duplicate', t => {
-  t.deepEqual(m('github')('Duplicate of #1, DUPLICATE of #2').actions.duplicate, [
+  t.deepEqual(issueParser('github')('Duplicate of #1, DUPLICATE of #2').actions.duplicate, [
     {issue: '1', action: 'Duplicate of', slug: undefined, prefix: '#', raw: 'Duplicate of #1'},
     {issue: '2', action: 'Duplicate of', slug: undefined, prefix: '#', raw: 'DUPLICATE of #2'},
   ]);
-  t.deepEqual(m('gitlab')('/duplicate #1, /DUPLICATE #2').actions.duplicate, [
+  t.deepEqual(issueParser('gitlab')('/duplicate #1, /DUPLICATE #2').actions.duplicate, [
     {issue: '1', action: '/duplicate', slug: undefined, prefix: '#', raw: '/duplicate #1'},
     {issue: '2', action: '/duplicate', slug: undefined, prefix: '#', raw: '/DUPLICATE #2'},
   ]);
 });
 
 test('Parse mentions', t => {
-  t.deepEqual(m('github')('@user@@user').mentions, [
+  t.deepEqual(issueParser('github')('@user@@user').mentions, [
     {raw: '@user', prefix: '@', user: 'user'},
     {raw: '@user', prefix: '@', user: 'user'},
   ]);
-  t.deepEqual(m('github')('@user,@user').mentions, [
+  t.deepEqual(issueParser('github')('@user,@user').mentions, [
     {raw: '@user', prefix: '@', user: 'user'},
     {raw: '@user', prefix: '@', user: 'user'},
   ]);
-  t.deepEqual(m('github')('@user, @user').mentions, [
+  t.deepEqual(issueParser('github')('@user, @user').mentions, [
     {raw: '@user', prefix: '@', user: 'user'},
     {raw: '@user', prefix: '@', user: 'user'},
   ]);
-  t.deepEqual(m('github')('@user@user').mentions, [{raw: '@user', prefix: '@', user: 'user'}]);
+  t.deepEqual(issueParser('github')('@user@user').mentions, [{raw: '@user', prefix: '@', user: 'user'}]);
 });
 
 test('Exclude code blocks with backtick', t => {
   t.deepEqual(
-    m('github')(
+    issueParser('github')(
       `Fix #1, \\\`Fix #2\\\` \`Fix #3\` \`\\\`Fix #4\\\`\`
 \`\`\`js
 Fix #5
@@ -274,7 +274,7 @@ Fix #5
 
 test('Exclude code blocks with html <code></code> tags', t => {
   t.deepEqual(
-    m('github')(`Fix #1 <code>Fix #2</code> Fix #3 <code>
+    issueParser('github')(`Fix #1 <code>Fix #2</code> Fix #3 <code>
 Fix #4</code> <CODE> Fix#5</CODE> <code><code>Fix #6</code>Fix #7</code>`).actions.close,
     [
       {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
@@ -282,36 +282,36 @@ Fix #4</code> <CODE> Fix#5</CODE> <code><code>Fix #6</code>Fix #7</code>`).actio
     ]
   );
 
-  t.deepEqual(m('github')(`Fix #1<code><code>Fix #2</code></code>`).actions.close, [
+  t.deepEqual(issueParser('github')(`Fix #1<code><code>Fix #2</code></code>`).actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
   ]);
 
   t.deepEqual(
-    m('github')(`Fix #1<code><code>
+    issueParser('github')(`Fix #1<code><code>
 Fix #2
 </code></code>`).actions.close,
     [{issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'}]
   );
 
-  t.deepEqual(m('github')(`\`<code>\`Fix #1</code>`).actions.close, [
+  t.deepEqual(issueParser('github')(`\`<code>\`Fix #1</code>`).actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
   ]);
 });
 
 test('Exclude HTML comments', t => {
-  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1 <!-- Fix #2 --> Fix #3').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
     {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
   ]);
 
-  t.deepEqual(m('github')('Fix #1 <!-- Fixes #2 --> #3').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1 <!-- Fixes #2 --> #3').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
   ]);
 
-  t.deepEqual(m('github')('Fix #1 <!-- Fixes #2 --> #3').refs, [{issue: '3', slug: undefined, prefix: '#', raw: '#3'}]);
+  t.deepEqual(issueParser('github')('Fix #1 <!-- Fixes #2 --> #3').refs, [{issue: '3', slug: undefined, prefix: '#', raw: '#3'}]);
 
   t.deepEqual(
-    m('github')(`Fix #1 <!--
+    issueParser('github')(`Fix #1 <!--
 Fix #2
 Closes #3
 --> Fix #4`).actions.close,
@@ -321,42 +321,42 @@ Closes #3
     ]
   );
 
-  t.deepEqual(m('github')('<!-- Fix #1 -->').actions.close, []);
+  t.deepEqual(issueParser('github')('<!-- Fix #1 -->').actions.close, []);
 
-  t.deepEqual(m('github')('<!--Fix #1-->').actions.close, []);
+  t.deepEqual(issueParser('github')('<!--Fix #1-->').actions.close, []);
 
-  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> Fix #5').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> Fix #5').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
     {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
     {issue: '5', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #5'},
   ]);
 
-  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> #5 <!-- Fix #6 --> #7').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> #5 <!-- Fix #6 --> #7').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
     {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
   ]);
 
-  t.deepEqual(m('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> #5 <!-- Fix #6 --> #7').refs, [
+  t.deepEqual(issueParser('github')('Fix #1 <!-- Fix #2 --> Fix #3 <!-- Fix #4 --> #5 <!-- Fix #6 --> #7').refs, [
     {issue: '5', slug: undefined, prefix: '#', raw: '#5'},
     {issue: '7', slug: undefined, prefix: '#', raw: '#7'},
   ]);
 
-  t.deepEqual(m('github')('Fix #1<!-- Fix #2 -->Fix #3').actions.close, [
+  t.deepEqual(issueParser('github')('Fix #1<!-- Fix #2 -->Fix #3').actions.close, [
     {issue: '1', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #1'},
     {issue: '3', action: 'Fix', slug: undefined, prefix: '#', raw: 'Fix #3'},
   ]);
 
-  t.deepEqual(m('github')('<!-- @user --> @other').mentions, [{raw: '@other', prefix: '@', user: 'other'}]);
+  t.deepEqual(issueParser('github')('<!-- @user --> @other').mentions, [{raw: '@other', prefix: '@', user: 'other'}]);
 });
 
 test('Empty options', t => {
-  t.deepEqual(m({actions: {close: []}, issuePrefixes: [], mentionsPrefixes: []})('Fix #1, @user'), {
+  t.deepEqual(issueParser({actions: {close: []}, issuePrefixes: [], mentionsPrefixes: []})('Fix #1, @user'), {
     actions: {duplicate: []},
     mentions: [],
     refs: [],
   });
   t.deepEqual(
-    m({referenceActions: ['', '', 'fix'], issuePrefixes: ['', '#'], mentionsPrefixes: ['@', '']})('Fix #1,@user'),
+    issueParser({referenceActions: ['', '', 'fix'], issuePrefixes: ['', '#'], mentionsPrefixes: ['@', '']})('Fix #1,@user'),
     {
       refs: [],
       actions: {
@@ -375,60 +375,60 @@ test('Empty String', t => {
     refs: [],
   };
 
-  t.deepEqual(m()('   '), empty);
-  t.deepEqual(m()(''), empty);
+  t.deepEqual(issueParser()('   '), empty);
+  t.deepEqual(issueParser()(''), empty);
 });
 
 test('Throw TypeError for invalid options', t => {
-  t.throws(() => m('missing-option'), {
+  t.throws(() => issueParser('missing-option'), {
     message: "The supported configuration are [github, bitbucket, gitlab, default], got 'missing-option'",
   });
-  t.throws(() => m([]), {message: 'The options argument must be a String or an Object'});
-  t.throws(() => m(1), {message: 'The options argument must be a String or an Object'});
-  t.throws(() => m({mentionsPrefixes: 1}), {
+  t.throws(() => issueParser([]), {message: 'The options argument must be a String or an Object'});
+  t.throws(() => issueParser(1), {message: 'The options argument must be a String or an Object'});
+  t.throws(() => issueParser({mentionsPrefixes: 1}), {
     message: 'The mentionsPrefixes property must be a String or an array of Strings',
   });
-  t.throws(() => m({mentionsPrefixes: [1]}), {
+  t.throws(() => issueParser({mentionsPrefixes: [1]}), {
     message: 'The mentionsPrefixes property must be a String or an array of Strings',
   });
-  t.throws(() => m({actions: 1}), {message: 'The options.actions property must be an Object'});
-  t.throws(() => m({actions: {close: 1}}), {
+  t.throws(() => issueParser({actions: 1}), {message: 'The options.actions property must be an Object'});
+  t.throws(() => issueParser({actions: {close: 1}}), {
     message: 'The actions.close property must be a String or an array of Strings',
   });
-  t.throws(() => m({actions: {close: [1]}}), {
+  t.throws(() => issueParser({actions: {close: [1]}}), {
     message: 'The actions.close property must be a String or an array of Strings',
   });
-  t.throws(() => m({actions: {fix: [1]}}), {
+  t.throws(() => issueParser({actions: {fix: [1]}}), {
     message: 'The actions.fix property must be a String or an array of Strings',
   });
 });
 
 test('Throw TypeError for invalid overrides', t => {
-  t.throws(() => m({}, []), {message: 'The overrides argument must be an Object'});
-  t.throws(() => m({}, 1), {message: 'The overrides argument must be an Object'});
-  t.throws(() => m({}, ''), {message: 'The overrides argument must be an Object'});
-  t.throws(() => m({}, 'string'), {message: 'The overrides argument must be an Object'});
-  t.throws(() => m({}, {mentionsPrefixes: 1}), {
+  t.throws(() => issueParser({}, []), {message: 'The overrides argument must be an Object'});
+  t.throws(() => issueParser({}, 1), {message: 'The overrides argument must be an Object'});
+  t.throws(() => issueParser({}, ''), {message: 'The overrides argument must be an Object'});
+  t.throws(() => issueParser({}, 'string'), {message: 'The overrides argument must be an Object'});
+  t.throws(() => issueParser({}, {mentionsPrefixes: 1}), {
     message: 'The mentionsPrefixes property must be a String or an array of Strings',
   });
-  t.throws(() => m({}, {mentionsPrefixes: [1]}), {
+  t.throws(() => issueParser({}, {mentionsPrefixes: [1]}), {
     message: 'The mentionsPrefixes property must be a String or an array of Strings',
   });
-  t.throws(() => m({}, {actions: 1}), {message: 'The overrides.actions property must be an Object'});
-  t.throws(() => m({}, {actions: {close: 1}}), {
+  t.throws(() => issueParser({}, {actions: 1}), {message: 'The overrides.actions property must be an Object'});
+  t.throws(() => issueParser({}, {actions: {close: 1}}), {
     message: 'The actions.close property must be a String or an array of Strings',
   });
-  t.throws(() => m({}, {actions: {close: [1]}}), {
+  t.throws(() => issueParser({}, {actions: {close: [1]}}), {
     message: 'The actions.close property must be a String or an array of Strings',
   });
-  t.throws(() => m({}, {actions: {fix: [1]}}), {
+  t.throws(() => issueParser({}, {actions: {fix: [1]}}), {
     message: 'The actions.fix property must be a String or an array of Strings',
   });
 });
 
 test('Throw TypeError for invalid input', t => {
-  t.throws(() => m()(), {message: 'The issue text must be a String'});
-  t.throws(() => m()(1), {message: 'The issue text must be a String'});
-  t.throws(() => m()({}), {message: 'The issue text must be a String'});
-  t.throws(() => m()([]), {message: 'The issue text must be a String'});
+  t.throws(() => issueParser()(), {message: 'The issue text must be a String'});
+  t.throws(() => issueParser()(1), {message: 'The issue text must be a String'});
+  t.throws(() => issueParser()({}), {message: 'The issue text must be a String'});
+  t.throws(() => issueParser()([]), {message: 'The issue text must be a String'});
 });

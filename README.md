@@ -25,7 +25,7 @@ $ npm install --save issue-parser
 ### GitHub format
 
 ```js
-const issueParser = require('issue-parser');
+import issueParser from 'issue-parser';
 const parse = issueParser('github');
 
 parse('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc @user');
@@ -44,7 +44,7 @@ parse('Issue description, ref user/package#1, Fix #2, Duplicate of #3 /cc @user'
 ### GitLab format
 
 ```js
-const issueParser = require('issue-parser');
+import issueParser from 'issue-parser';
 const parse = issueParser('gitlab');
 
 parse('Issue description, ref group/user/package#1, !2, implement #3, /duplicate #4 /cc @user');
@@ -66,7 +66,7 @@ parse('Issue description, ref group/user/package#1, !2, implement #3, /duplicate
 ### Bitbucket format
 
 ```js
-const issueParser = require('issue-parser');
+import issueParser from 'issue-parser';
 const parse = issueParser('bitbucket');
 
 parse('Issue description, ref user/package#1, fixing #2. /cc @user');
@@ -84,7 +84,7 @@ parse('Issue description, ref user/package#1, fixing #2. /cc @user');
 ### Custom format
 
 ```js
-const issueParser = require('issue-parser');
+import issueParser from 'issue-parser';
 const parse = issueParser({actions: {fix: ['complete'], hold: ['holds up']}, issuePrefixes: ['🐛']});
 
 parse('Issue description, related to user/package🐛1, Complete 🐛2, holds up 🐛3');
@@ -102,7 +102,7 @@ parse('Issue description, related to user/package🐛1, Complete 🐛2, holds up
 ### Extend existing format
 
 ```js
-const issueParser = require('issue-parser');
+import issueParser from 'issue-parser';
 const parse = issueParser('github', {actions: {parent: ['parent of'], related: ['related to']}});
 
 parse('Issue description, ref user/package#1, Fix #2, Parent of #3, related to #4 /cc @user');
@@ -368,7 +368,7 @@ Option overrides. Useful when using predefined [`options`](#options) (such as `g
 
 For example, the following will use all the `github` predefined options but with a different `hosts` option:
 ```js
-const issueParser = require('issue-parser');
+import issueParser from 'issue-parser';
 const parse = issueParser('github', {hosts: ['https://custom-url.com']});
 ```
 

@@ -3,6 +3,7 @@
   "description": "Parser for Github, GitLab and Bitbucket issues actions, references and mentions",
   "version": "0.0.0-development",
   "author": "Pierre Vanduynslager (https://github.com/pvdlg)",
+  "type": "module",
   "ava": {
     "files": [
       "test/**/*.test.js"
@@ -20,10 +21,10 @@
   },
   "devDependencies": {
     "ava": "6.4.1",
+    "c8": "12.0.0",
     "lockfile-lint": "5.0.0",
     "ls-engines": "0.9.4",
     "npm-run-all2": "9.0.2",
-    "nyc": "18.0.0",
     "publint": "0.3.23",
     "xo": "0.28.3"
   },
@@ -51,8 +52,9 @@
     "resolve"
   ],
   "license": "MIT",
-  "main": "index.js",
-  "nyc": {
+  "main": "./index.js",
+  "exports": "./index.js",
+  "c8": {
     "include": [
       "lib/**/*.js",
       "index.js"
@@ -85,7 +87,7 @@
   },
   "scripts": {
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
-    "test:unit": "nyc ava -v",
+    "test:unit": "c8 ava -v",
     "lint:js": "xo",
     "lint:lockfile": "lockfile-lint",
     "lint:engines": "ls-engines",
