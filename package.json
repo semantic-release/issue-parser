@@ -25,8 +25,8 @@
     "lockfile-lint": "5.0.0",
     "ls-engines": "0.9.4",
     "npm-run-all2": "9.0.2",
-    "publint": "0.3.23",
-    "xo": "0.28.3"
+    "prettier": "3.8.5",
+    "publint": "0.3.23"
   },
   "engines": {
     "node": "^18.17 || >=20.6.1"
@@ -88,7 +88,9 @@
   "scripts": {
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "test:unit": "c8 ava -v",
-    "lint:js": "xo",
+    "lint": "prettier --check \"index.js\" \"lib/**/*.js\" \"test/**/*.js\" \"package.json\"",
+    "lint:prettier": "prettier --check \"index.js\" \"lib/**/*.js\" \"test/**/*.js\" \"package.json\"",
+    "lint:prettier:fix": "prettier --write \"index.js\" \"lib/**/*.js\" \"test/**/*.js\" \"package.json\"",
     "lint:lockfile": "lockfile-lint",
     "lint:engines": "ls-engines",
     "lint:publish": "publint --strict"
@@ -97,12 +99,5 @@
     "extends": [
       "github>semantic-release/.github:renovate-config"
     ]
-  },
-  "xo": {
-    "prettier": true,
-    "space": true,
-    "rules": {
-      "unicorn/string-content": "off"
-    }
   }
 }
